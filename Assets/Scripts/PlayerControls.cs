@@ -39,7 +39,7 @@ public class PlayerController : MonoBehaviour
     {
         MovePlayer();
     }
-
+    
     private void MovePlayer()
     {
         // Normalize the input to avoid diagonal speed boost and apply speed

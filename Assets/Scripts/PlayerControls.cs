@@ -12,11 +12,13 @@ public class PlayerController : MonoBehaviour
 
     private Vector2 inputDirection;     // Direction of input from the player (X and Z plane)
     private Rigidbody rb;               // Reference to Rigidbody component for 3D physics
+    private SpriteRenderer spriteRenderer;
     private bool isJumping;             // To track if the player is jumping
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     // This method will be called by the PlayerInput component automatically
@@ -38,6 +40,7 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         MovePlayer();
+        spriteRenderer.flipX = rb.velocity.x <0f;
     }
     
     private void MovePlayer()

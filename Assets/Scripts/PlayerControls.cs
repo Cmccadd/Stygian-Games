@@ -15,6 +15,7 @@ public class PlayerController : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private bool isJumping;             // To track if the player is jumping
 
+    private Interactable currentInteractable;
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -65,5 +66,51 @@ public class PlayerController : MonoBehaviour
     private bool isGrounded()
     {
         return Physics.CheckSphere(groundCheck.transform.position, 0.1f, ground);
+    }
+
+
+    private void OnInteract()
+    {
+        Debug.Log("What is this thing?");
+        if(currentInteractable != null)
+        {
+            currentInteractable.InteractWith();
+        }
+    }
+
+    void OnTriggerStay(Collider other)
+    {
+        if (other.GetComponent<Interactable>())
+        {
+            currentInteractable = other.GetComponent<Interactable>();
+            //intIcon.SetActive(true);
+            //if (Input.GetKeyDown(KeyCode.E))
+            //{
+            //    if (toggle == true)
+            //    {
+            //        lightOn.SetActive(true);
+            //        lightOff.SetActive(false);
+            //        switchOn.SetActive(true);
+            //        switchOff.SetActive(false);
+            //        //switchSound.Play();
+            //    }
+            //    if (toggle == false)
+            //    {
+            //        lightOn.SetActive(false);
+            //        lightOff.SetActive(true);
+            //        switchOn.SetActive(false);
+            //        switchOff.SetActive(true);
+            //        //switchSound.Play();
+            //    }
+            //}
+        }
+    }
+    void OnTriggerExit(Collider other)
+    {
+        //if (other.CompareTag("MainCamera"))
+        //{
+        //    intIcon.SetActive(false);
+        //}
+        currentInteractable = null;
     }
 }

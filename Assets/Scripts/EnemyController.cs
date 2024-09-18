@@ -1,89 +1,117 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class EnemyController : MonoBehaviour
 {
-    [SerializeField] private NavMeshAgent agent; // NavMeshAgent for controlling movement
-    [SerializeField] private Transform player;   // Reference to the player
-    [SerializeField] private LayerMask whatIsGround, whatIsPlayer; // LayerMask for detection
+    [SerializeField] private NavMeshAgent agent;  // NavMeshAgent for controlling movement
+    [SerializeField] private EnemyFieldOfView fieldOfView;  // Reference to the EnemyFieldOfView script
+    [SerializeField] private Transform player;  // Reference to the player
 
     // Patroling variables
-    public Transform[] patrolPoints; // Set patrol points in the inspector as Transform objects
+    public Transform[] patrolPoints;  // Set patrol points in the inspector as Transform objects
     private int currentPatrolIndex;
     private bool walkPointSet;
+    public float patrolWaitTime = 2f;  // Time to wait at each patrol point
+    private bool waiting;
 
-    // States
-    public float sightRange;       // Range for detecting player
-    public bool playerInSightRange;
-
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
+        // Initialize components
         agent = GetComponent<NavMeshAgent>();
 
-        // Find the player by tag
-        GameObject playerObject = GameObject.FindWithTag("Player");
-        if (playerObject != null)
+        // Ensure EnemyFieldOfView is assigned
+        if (fieldOfView == null)
         {
-            player = playerObject.transform;
+            fieldOfView = GetComponent<EnemyFieldOfView>();
         }
 
-        currentPatrolIndex = 0; // Start at the first patrol point
-        walkPointSet = true;    // Ensure the first patrol point is set
+        // Find the player by tag if not directly assigned
+        if (player == null)
+        {
+            GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+            if (playerObject != null)
+            {
+                player = playerObject.transform;
+            }
+        }
+
+        // Initialize patrol settings
+        currentPatrolIndex = 0;
+        walkPointSet = true;
     }
 
-    // Update is called once per frame
     private void Update()
     {
-        // Check if the player is within sight range
-        playerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer);
+        // Check if the player is within the field of view
+        bool playerInSightRange = fieldOfView.playerInSight;
 
-        if (!playerInSightRange) Patroling();
-        if (playerInSightRange) ChasePlayer();
+        if (!playerInSightRange)
+        {
+            if (!waiting) Patroling();  // Patrol if the player is not in sight and enemy isn't waiting
+        }
+        else
+        {
+            ChasePlayer();  // Chase the player when detected
+        }
     }
 
-    // Patrol between predefined points
     private void Patroling()
     {
         if (!walkPointSet && patrolPoints.Length > 0)
         {
-            SetNextPatrolPoint(); // Set the next patrol point
+            SetNextPatrolPoint();  // Set the next patrol point
         }
 
-        if (walkPointSet && agent.remainingDistance < 1f) // If agent is near destination
+        if (walkPointSet && agent.remainingDistance < 1f && !waiting)  // If agent reached patrol point
         {
-            walkPointSet = false; // Clear walk point, set new one on next update
+            walkPointSet = false;  // Clear the patrol point
+            StartCoroutine(LookAround());  // Look around before moving to the next point
         }
     }
 
-    // Set the next patrol point from the list
     private void SetNextPatrolPoint()
     {
-        // Set agent destination to the position of the next patrol point
+        // Set the destination to the next patrol point
         agent.SetDestination(patrolPoints[currentPatrolIndex].position);
         walkPointSet = true;
 
-        // Loop through patrol points
+        // Update the patrol index to loop through the points
         currentPatrolIndex = (currentPatrolIndex + 1) % patrolPoints.Length;
     }
 
-    // Chase the player when they are within sight range
     private void ChasePlayer()
     {
         if (player != null)
         {
-            agent.SetDestination(player.position);
+            agent.SetDestination(player.position);  // Move towards the player's position
         }
     }
 
-    // Visualize sight range and patrol points in the editor
+    // Coroutine to stop and look around at a patrol point or after losing the player
+    private IEnumerator LookAround()
+    {
+        waiting = true;
+        agent.isStopped = true;  // Stop the agent from moving
+
+        float lookTime = patrolWaitTime;  // Time to wait and look around
+        while (lookTime > 0f)
+        {
+            // Optional: Add rotation code if you want the enemy to rotate while looking around
+            lookTime -= Time.deltaTime;
+            yield return null;
+        }
+
+        agent.isStopped = false;  // Resume agent movement
+        waiting = false;
+    }
+
+    // Visualize patrol points and sight range in the editor
     private void OnDrawGizmosSelected()
     {
-        // Draw sight range
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, sightRange);
+        Gizmos.DrawWireSphere(transform.position, fieldOfView.viewRadius);
 
-        // Draw patrol points
         Gizmos.color = Color.green;
         if (patrolPoints != null)
         {

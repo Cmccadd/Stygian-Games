@@ -16,10 +16,16 @@ public class PlayerController : MonoBehaviour
     private bool isJumping;             // To track if the player is jumping
 
     private Interactable currentInteractable;
+
+    [SerializeField] private CheckpointManager _checkpointManager;
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        // Grabs the Checkpoint Manager
+        _checkpointManager = FindObjectOfType<CheckpointManager>();
+        // Sets the player's position to the last checkpoint they touch
+        transform.position = _checkpointManager.LastCheckPointPos;
     }
 
     // This method will be called by the PlayerInput component automatically

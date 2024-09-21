@@ -122,7 +122,7 @@ GameObject:
   - component: {fileID: 1375608243307405232}
   m_Layer: 0
   m_Name: Enemy
-  m_TagString: Enemy Body
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -287,6 +287,12 @@ MonoBehaviour:
     m_Bits: 128
   patrolPoints: []
   patrolWaitTime: 2
+  patrolSpeed: 3.5
+  chaseSpeed: 5
+  lookAroundRotationSpeed: 120
   chaseTime: 5
-  sightRange: 10
+  hidingTimerDuration: 3
+  sightRange: 8
   playerInSightRange: 0
+  raycastDistance: 15
+  raycastHeightOffset: 1

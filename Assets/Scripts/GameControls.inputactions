@@ -44,16 +44,7 @@
                 {
                     "name": "Interact",
                     "type": "Button",
-                    "id": "7d0e62a9-1012-4d45-a4dd-b943ef758d5a",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Hide",
-                    "type": "Button",
-                    "id": "fd250ce3-6fe5-4ef7-b717-24a759fceca5",
+                    "id": "b8d3c25b-7d2d-4f15-a92a-9464ff513fb0",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -206,23 +197,12 @@
                 },
                 {
                     "name": "",
-                    "id": "5c4f0c88-6503-4d5e-8131-d24007cd9799",
+                    "id": "01fc0215-5e13-45fc-adcd-6dd762349840",
                     "path": "<Keyboard>/e",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Interact",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "0da8ff49-205a-4577-8659-b076e3129639",
-                    "path": "<Keyboard>/shift",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Hide",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

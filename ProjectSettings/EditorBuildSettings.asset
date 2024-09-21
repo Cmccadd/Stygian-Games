@@ -4,5 +4,20 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 0
+    path: Assets/Scenes/Work Scenes/Amber.unity
+    guid: a20e65fdff07ac743a8e56ca7e746511
+  - enabled: 1
+    path: Assets/Scenes/Game Scenes/Menu.unity
+    guid: 4b9d98002e1dea84da4f7855c3023c32
+  - enabled: 1
+    path: Assets/Scenes/Game Scenes/Scene 1.unity
+    guid: b90e1e77b2ae55445b57d94f178c0179
+  - enabled: 1
+    path: Assets/Scenes/Game Scenes/Scene 2.unity
+    guid: ab11b202bd336774b99814bb176d38ee
+  - enabled: 1
+    path: Assets/Scenes/Game Scenes/Scene 3.unity
+    guid: 5357a2f17a6e5cc41b983a016c012010
   m_configObjects: {}

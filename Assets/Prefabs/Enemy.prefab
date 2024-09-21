@@ -291,7 +291,8 @@ MonoBehaviour:
   chaseSpeed: 5
   lookAroundRotationSpeed: 120
   chaseTime: 5
-  sightRange: 10
+  hidingTimerDuration: 3
+  sightRange: 8
   playerInSightRange: 0
   raycastDistance: 15
   raycastHeightOffset: 1

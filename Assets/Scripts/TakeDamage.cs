@@ -11,7 +11,7 @@ public class TakeDamage : MonoBehaviour
     // If the player collides with an enemy, reduce health by 1
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.name == "Enemy")
+        if (collision.gameObject.tag == "Enemy")
         {
             healthCount--;
 
@@ -19,7 +19,21 @@ public class TakeDamage : MonoBehaviour
             if (healthCount <= 0 )
             {
                 gameOver.SetActive(true);
-                SceneManager.LoadScene(0);
+                SceneManager.GetActiveScene();
+            }
+        } 
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Crush")
+        {
+            healthCount = 0;
+
+            // If health reaches zero, trigger a game over
+            if (healthCount <= 0)
+            {
+                gameOver.SetActive(true);
+                SceneManager.GetActiveScene();
             }
         }
     }

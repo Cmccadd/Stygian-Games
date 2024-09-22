@@ -4,48 +4,60 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement Settings")]
-    public float moveSpeed = 5f;        // Speed at which the player moves
-    public float jumpForce = 5.5f;      // Force applied when jumping
-    public GameObject groundCheck;      // Object to check if the player is grounded
-    public LayerMask ground;            // Layer representing the ground
+    public float moveSpeed = 5f;
+    public float jumpForce = 5.5f;
+    public GameObject groundCheck;
+    public LayerMask ground;
 
-    private Vector2 inputDirection;     // Direction of input from the player (X and Z plane)
-    private Rigidbody rb;               // Reference to Rigidbody component for 3D physics
+    private Vector2 inputDirection;
+    private Rigidbody rb;
     private SpriteRenderer spriteRenderer;
-    private Collider playerCollider;    // Reference to the player's collider
-    public bool isHidden;               // To track if the player is hiding
-    private bool nearHideableObject;    // To check if the player is near a hideable object
-    private GameObject[] enemies;       // Array to store all enemies with the "Enemy" tag
-    private Interactable currentInteractable;  // Current interactable object
+    private Collider playerCollider;
+    public bool isHidden;
+    private bool nearHideableObject;
+    private bool insideHideSpot;  // Track if inside hideable object
+    private GameObject[] enemies;
+    private Interactable currentInteractable;
 
     [SerializeField] private CheckpointManager _checkpointManager;
+
+    // Add a reference to the player's inventory
+    public Inventory inventory;
+
+    // Name of the exorcism item, for example, "Sigil"
+    public string excursionItemName = "Sigil";
+
+    // Exorcism detection variables
+    public float exorcismRange = 3f;  // Radius of the exorcism detection sphere
+    private Collider[] enemiesInRange;
+
+    private bool isFacingRight = true; // Track the last facing direction
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-        playerCollider = GetComponent<Collider>();  // Get the player's collider
+        playerCollider = GetComponent<Collider>();
 
-        // Grabs the Checkpoint Manager
         _checkpointManager = FindObjectOfType<CheckpointManager>();
-        // Sets the player's position to the last checkpoint they touch
         transform.position = _checkpointManager.LastCheckPointPos;
 
         isHidden = false;
         nearHideableObject = false;
+        insideHideSpot = false;  // Default to false
     }
 
     private void Start()
     {
-        // Find all enemies by tag and store them in the enemies array
         enemies = GameObject.FindGameObjectsWithTag("Enemy");
     }
 
     public void OnMove(InputValue value)
     {
-        if (!isHidden) // Only allow movement if not hiding
+        if (!isHidden)
         {
             inputDirection = value.Get<Vector2>();
+            UpdateSpriteFlip();
         }
     }
 
@@ -59,42 +71,46 @@ public class PlayerController : MonoBehaviour
 
     public void OnHide(InputValue value)
     {
-        if (value.isPressed && nearHideableObject)
+        // Only allow hiding if the player is near or inside a hideable object
+        if (value.isPressed && nearHideableObject && insideHideSpot)
         {
             ToggleHide();
         }
     }
 
+    public void OnInteract(InputValue value)
+    {
+        if (value.isPressed)
+        {
+            if (currentInteractable != null)
+            {
+                currentInteractable.InteractWith(this); // Pass the player reference
+            }
+            else
+            {
+                // Check for enemies in the exorcism range
+                UseExcursionItemOnEnemies();
+            }
+        }
+    }
+
     private void FixedUpdate()
     {
-        if (!isHidden) // Only allow movement if not hiding
+        if (!isHidden)
         {
             MovePlayer();
-            spriteRenderer.flipX = rb.velocity.x < 0f;
-        }
-
-        // Always check for grounding
-        if (isGrounded())
-        {
-            // Logic for when grounded, if needed
         }
     }
 
     private void MovePlayer()
     {
-        // Normalize the input to avoid diagonal speed boost and apply speed
         Vector3 movement = new Vector3(inputDirection.x, 0, inputDirection.y).normalized * moveSpeed;
-
-        // Preserve the player's current Y velocity (e.g., jumping or falling)
         movement.y = rb.velocity.y;
-
-        // Apply the movement
         rb.velocity = movement;
     }
 
     private void Jump()
     {
-        // Apply jump force along the Y-axis
         rb.velocity = new Vector3(rb.velocity.x, jumpForce, rb.velocity.z);
     }
 
@@ -109,11 +125,9 @@ public class PlayerController : MonoBehaviour
 
         if (isHidden)
         {
-            // When hiding, stop player movement and make the player invisible
-            rb.velocity = Vector3.zero;  // Stop the player from moving
-            spriteRenderer.enabled = false;  // Hide the player's sprite
+            rb.velocity = Vector3.zero;
+            spriteRenderer.enabled = false;
 
-            // Disable collisions with all enemies
             foreach (GameObject enemy in enemies)
             {
                 Collider enemyCollider = enemy.GetComponent<Collider>();
@@ -122,16 +136,12 @@ public class PlayerController : MonoBehaviour
                     Physics.IgnoreCollision(playerCollider, enemyCollider, true);
                 }
             }
-
-            // Lock the player's position to avoid falling through the floor
             rb.isKinematic = true;
         }
         else
         {
-            // Unhide the player
-            spriteRenderer.enabled = true;  // Show the player's sprite
+            spriteRenderer.enabled = true;
 
-            // Re-enable collisions with all enemies
             foreach (GameObject enemy in enemies)
             {
                 Collider enemyCollider = enemy.GetComponent<Collider>();
@@ -140,17 +150,51 @@ public class PlayerController : MonoBehaviour
                     Physics.IgnoreCollision(playerCollider, enemyCollider, false);
                 }
             }
-
-            // Unlock the player's movement
             rb.isKinematic = false;
         }
     }
 
-    private void OnInteract()
+    // Update sprite flip direction based on movement
+    private void UpdateSpriteFlip()
     {
-        if (currentInteractable != null)
+        if (inputDirection.x > 0 && !isFacingRight)
         {
-            currentInteractable.InteractWith();
+            FlipSprite(true);  // Face right
+        }
+        else if (inputDirection.x < 0 && isFacingRight)
+        {
+            FlipSprite(false); // Face left
+        }
+    }
+
+    // Flip the sprite based on movement direction
+    private void FlipSprite(bool faceRight)
+    {
+        isFacingRight = faceRight;
+        spriteRenderer.flipX = !faceRight;
+    }
+
+    // Check for enemies in the exorcism range and use the excursion item if available
+    private void UseExcursionItemOnEnemies()
+    {
+        if (inventory.HasItem(excursionItemName))
+        {
+            enemiesInRange = Physics.OverlapSphere(transform.position, exorcismRange, LayerMask.GetMask("Enemy"));
+
+            foreach (Collider enemyCollider in enemiesInRange)
+            {
+                EnemyAI enemy = enemyCollider.GetComponent<EnemyAI>();
+                if (enemy != null)
+                {
+                    enemy.Excise();
+                }
+            }
+
+            inventory.UseItem(excursionItemName);
+        }
+        else
+        {
+            Debug.Log("No excursion item available in inventory.");
         }
     }
 
@@ -160,11 +204,21 @@ public class PlayerController : MonoBehaviour
         {
             currentInteractable = interactable;
         }
+
+        if (other.CompareTag("Hideable"))
+        {
+            insideHideSpot = true;
+        }
     }
 
     private void OnTriggerExit(Collider other)
     {
         currentInteractable = null;
+
+        if (other.CompareTag("Hideable"))
+        {
+            insideHideSpot = false; // Reset when leaving hideable area
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -175,4 +229,13 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // Visualize the exorcism detection range using Gizmos in the Scene view
+    private void OnDrawGizmosSelected()
+    {
+        if (Application.isPlaying)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(transform.position, exorcismRange);
+        }
+    }
 }

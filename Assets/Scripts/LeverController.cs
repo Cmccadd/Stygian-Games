@@ -9,9 +9,9 @@ public class LeverController : Interactable
     //public AudioSource switchSound;
 
 
-    public override void InteractWith()
+    public override void InteractWith(PlayerController player)
     {
-        base.InteractWith();
+        base.InteractWith(player);
         if (toggle == true)
         {
             lightOn.SetActive(true);

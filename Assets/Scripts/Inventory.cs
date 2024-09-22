@@ -3,29 +3,26 @@ using UnityEngine;
 
 public class Inventory : MonoBehaviour
 {
-    public List<InventoryItem> items = new List<InventoryItem>(); // The list of items in the inventory
+    public List<InventoryItem> items = new List<InventoryItem>(); // List to hold inventory items
+    public int maxInventorySize = 10;  // Optional limit for inventory size
 
-    // Add an item to the inventory
-    public void AddItem(InventoryItem item)
+    // Add item to the inventory and return true if successful
+    public bool AddItem(InventoryItem item)
     {
-        if (item != null)
+        if (items.Count < maxInventorySize)
         {
             items.Add(item);
-            Debug.Log($"Picked up: {item.itemName}");
+            Debug.Log($"{item.itemName} added to inventory.");
+            return true;
         }
-    }
-
-    // Remove an item from the inventory
-    public void RemoveItem(InventoryItem item)
-    {
-        if (items.Contains(item))
+        else
         {
-            items.Remove(item);
-            Debug.Log($"Removed: {item.itemName}");
+            Debug.Log("Inventory is full!");
+            return false;
         }
     }
 
-    // Check if the inventory contains a specific item by name
+    // Check if the inventory contains an item by name
     public bool HasItem(string itemName)
     {
         foreach (InventoryItem item in items)
@@ -36,5 +33,30 @@ public class Inventory : MonoBehaviour
             }
         }
         return false;
+    }
+
+    // Use an item and remove it from the inventory
+    public void UseItem(string itemName)
+    {
+        InventoryItem itemToUse = null;
+
+        foreach (InventoryItem item in items)
+        {
+            if (item.itemName == itemName)
+            {
+                itemToUse = item;
+                break;
+            }
+        }
+
+        if (itemToUse != null)
+        {
+            items.Remove(itemToUse);
+            Debug.Log($"{itemName} used and removed from inventory.");
+        }
+        else
+        {
+            Debug.LogError($"{itemName} not found in inventory.");
+        }
     }
 }

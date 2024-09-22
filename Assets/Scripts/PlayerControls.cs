@@ -15,10 +15,23 @@ public class PlayerController : MonoBehaviour
     private Collider playerCollider;
     public bool isHidden;
     private bool nearHideableObject;
+    private bool insideHideSpot;  // Track if inside hideable object
     private GameObject[] enemies;
     private Interactable currentInteractable;
 
     [SerializeField] private CheckpointManager _checkpointManager;
+
+    // Add a reference to the player's inventory
+    public Inventory inventory;
+
+    // Name of the exorcism item, for example, "Sigil"
+    public string excursionItemName = "Sigil";
+
+    // Exorcism detection variables
+    public float exorcismRange = 3f;  // Radius of the exorcism detection sphere
+    private Collider[] enemiesInRange;
+
+    private bool isFacingRight = true; // Track the last facing direction
 
     private void Awake()
     {
@@ -31,6 +44,7 @@ public class PlayerController : MonoBehaviour
 
         isHidden = false;
         nearHideableObject = false;
+        insideHideSpot = false;  // Default to false
     }
 
     private void Start()
@@ -43,6 +57,7 @@ public class PlayerController : MonoBehaviour
         if (!isHidden)
         {
             inputDirection = value.Get<Vector2>();
+            UpdateSpriteFlip();
         }
     }
 
@@ -56,7 +71,8 @@ public class PlayerController : MonoBehaviour
 
     public void OnHide(InputValue value)
     {
-        if (value.isPressed && nearHideableObject)
+        // Only allow hiding if the player is near or inside a hideable object
+        if (value.isPressed && nearHideableObject && insideHideSpot)
         {
             ToggleHide();
         }
@@ -64,9 +80,17 @@ public class PlayerController : MonoBehaviour
 
     public void OnInteract(InputValue value)
     {
-        if (value.isPressed && currentInteractable != null)
+        if (value.isPressed)
         {
-            currentInteractable.InteractWith(this); // Pass the player reference
+            if (currentInteractable != null)
+            {
+                currentInteractable.InteractWith(this); // Pass the player reference
+            }
+            else
+            {
+                // Check for enemies in the exorcism range
+                UseExcursionItemOnEnemies();
+            }
         }
     }
 
@@ -75,7 +99,6 @@ public class PlayerController : MonoBehaviour
         if (!isHidden)
         {
             MovePlayer();
-            spriteRenderer.flipX = rb.velocity.x < 0f;
         }
     }
 
@@ -99,21 +122,120 @@ public class PlayerController : MonoBehaviour
     private void ToggleHide()
     {
         isHidden = !isHidden;
-        rb.velocity = Vector3.zero;
-        spriteRenderer.enabled = !isHidden;
-        rb.isKinematic = isHidden;
+
+        if (isHidden)
+        {
+            rb.velocity = Vector3.zero;
+            spriteRenderer.enabled = false;
+
+            foreach (GameObject enemy in enemies)
+            {
+                Collider enemyCollider = enemy.GetComponent<Collider>();
+                if (enemyCollider != null)
+                {
+                    Physics.IgnoreCollision(playerCollider, enemyCollider, true);
+                }
+            }
+            rb.isKinematic = true;
+        }
+        else
+        {
+            spriteRenderer.enabled = true;
+
+            foreach (GameObject enemy in enemies)
+            {
+                Collider enemyCollider = enemy.GetComponent<Collider>();
+                if (enemyCollider != null)
+                {
+                    Physics.IgnoreCollision(playerCollider, enemyCollider, false);
+                }
+            }
+            rb.isKinematic = false;
+        }
+    }
+
+    // Update sprite flip direction based on movement
+    private void UpdateSpriteFlip()
+    {
+        if (inputDirection.x > 0 && !isFacingRight)
+        {
+            FlipSprite(true);  // Face right
+        }
+        else if (inputDirection.x < 0 && isFacingRight)
+        {
+            FlipSprite(false); // Face left
+        }
+    }
+
+    // Flip the sprite based on movement direction
+    private void FlipSprite(bool faceRight)
+    {
+        isFacingRight = faceRight;
+        spriteRenderer.flipX = !faceRight;
+    }
+
+    // Check for enemies in the exorcism range and use the excursion item if available
+    private void UseExcursionItemOnEnemies()
+    {
+        if (inventory.HasItem(excursionItemName))
+        {
+            enemiesInRange = Physics.OverlapSphere(transform.position, exorcismRange, LayerMask.GetMask("Enemy"));
+
+            foreach (Collider enemyCollider in enemiesInRange)
+            {
+                EnemyAI enemy = enemyCollider.GetComponent<EnemyAI>();
+                if (enemy != null)
+                {
+                    enemy.Excise();
+                }
+            }
+
+            inventory.UseItem(excursionItemName);
+        }
+        else
+        {
+            Debug.Log("No excursion item available in inventory.");
+        }
     }
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.TryGetComponent(out Interactable interactable))
+        if (other.TryGetComponent<Interactable>(out Interactable interactable))
         {
             currentInteractable = interactable;
+        }
+
+        if (other.CompareTag("Hideable"))
+        {
+            insideHideSpot = true;
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
         currentInteractable = null;
+
+        if (other.CompareTag("Hideable"))
+        {
+            insideHideSpot = false; // Reset when leaving hideable area
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Hideable"))
+        {
+            nearHideableObject = true;
+        }
+    }
+
+    // Visualize the exorcism detection range using Gizmos in the Scene view
+    private void OnDrawGizmosSelected()
+    {
+        if (Application.isPlaying)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(transform.position, exorcismRange);
+        }
     }
 }

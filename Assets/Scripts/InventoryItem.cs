@@ -1,9 +1,8 @@
 using UnityEngine;
 
-public class InventoryItem : MonoBehaviour
+[CreateAssetMenu(fileName = "New Inventory Item", menuName = "Inventory/Item")]
+public class InventoryItem : ScriptableObject
 {
-    public string itemName; // Name of the item (e.g., "Key", "Sigil")
-    public Sprite itemIcon; // Icon for UI if needed
-
-    // Optionally, you can add more fields like description, type, etc.
+    public string itemName; // Name of the item
+    public Sprite itemIcon; // Icon to display in the inventory UI (optional)
 }

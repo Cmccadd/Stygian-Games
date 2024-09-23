@@ -221,19 +221,25 @@ public class PlayerController : MonoBehaviour
     // Check for enemies in the exorcism range and use the excursion item if available
     private void UseExcursionItemOnEnemies()
     {
+        // Check if the player has the required excursion item in the inventory
         if (inventory.HasItem(excursionItemName))
         {
+            // Get all colliders in the exorcism range
             enemiesInRange = Physics.OverlapSphere(transform.position, exorcismRange, LayerMask.GetMask("Enemy"));
 
             bool enemyInRange = false; // Track if any enemy is in range
 
             foreach (Collider enemyCollider in enemiesInRange)
             {
-                EnemyAI enemy = enemyCollider.GetComponent<EnemyAI>();
-                if (enemy != null)
+                // Check if the enemyCollider is still valid (not null) before accessing its EnemyAI component
+                if (enemyCollider != null)
                 {
-                    enemy.Excise();
-                    enemyInRange = true; // Mark that an enemy was in range
+                    EnemyAI enemy = enemyCollider.GetComponent<EnemyAI>();
+                    if (enemy != null) // Ensure the enemy is not destroyed
+                    {
+                        enemy.Excise();
+                        enemyInRange = true; // Mark that an enemy was in range
+                    }
                 }
             }
 

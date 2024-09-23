@@ -274,6 +274,8 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+
+
     private void OnTriggerExit(Collider other)
     {
         currentInteractable = null;

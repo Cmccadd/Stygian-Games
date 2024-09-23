@@ -19,6 +19,8 @@ public class PlayerController : MonoBehaviour
     private GameObject[] enemies;
     private Interactable currentInteractable;
 
+    private bool facingLeft = false;  // To track the last direction faced
+
     [SerializeField] private CheckpointManager _checkpointManager;
 
     // Add a reference to the player's inventory
@@ -96,7 +98,7 @@ public class PlayerController : MonoBehaviour
         if (!isHidden)
         {
             MovePlayer();
-            spriteRenderer.flipX = rb.velocity.x < 0f;
+            HandleSpriteFlip();  // Handle sprite flipping based on movement direction
         }
     }
 
@@ -152,13 +154,27 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // Handle flipping the sprite based on movement direction
+    private void HandleSpriteFlip()
+    {
+        if (inputDirection.x > 0 && facingLeft)
+        {
+            spriteRenderer.flipX = false;
+            facingLeft = false;
+        }
+        else if (inputDirection.x < 0 && !facingLeft)
+        {
+            spriteRenderer.flipX = true;
+            facingLeft = true;
+        }
+        // If no movement input, the sprite remains facing its last direction
+    }
+
     // Check for enemies in the exorcism range and use the excursion item if available
     private void UseExcursionItemOnEnemies()
     {
-        // Check if the player has the required excursion item in the inventory
         if (inventory.HasItem(excursionItemName))
         {
-            // Get all colliders in the exorcism range
             enemiesInRange = Physics.OverlapSphere(transform.position, exorcismRange, LayerMask.GetMask("Enemy"));
 
             bool enemyInRange = false; // Track if any enemy is in range
@@ -168,7 +184,6 @@ public class PlayerController : MonoBehaviour
                 EnemyAI enemy = enemyCollider.GetComponent<EnemyAI>();
                 if (enemy != null)
                 {
-                    // Exorcise the enemy and set flag
                     enemy.Excise();
                     enemyInRange = true; // Mark that an enemy was in range
                 }

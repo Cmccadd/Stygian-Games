@@ -26,14 +26,17 @@ public class EnemyAI : MonoBehaviour
     private float chaseTimer;
 
     [Header("Detection Settings")]
-    public float sightRange = 10f;
-    public float coneAngle = 45f;  // Cone angle for field of view detection
+    public float sightRange;
     public bool playerInSightRange;
 
     [Header("Raycast Detection Settings")]
-    public float raycastDistance = 20f;  // Extended distance for cone detection
+    public float raycastDistance = 10f;
     public float raycastHeightOffset = 1.5f;
     private bool playerInRaycast;
+
+    [Header("Key Drop Settings")]
+    public GameObject keyPrefab;  // Reference to the key prefab
+    public Transform dropPoint;   // Optional: a specific point where the key will be dropped (default is enemy position)
 
     private void Start()
     {
@@ -46,7 +49,10 @@ public class EnemyAI : MonoBehaviour
     private void Update()
     {
         // Check if the player is in sight range and not hidden
-        playerInSightRange = CheckConeForPlayer() && !playerController.isHidden;
+        playerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer) && !playerController.isHidden;
+
+        // Perform raycast to check for player and ensure player is not hidden
+        playerInRaycast = CheckRaycastForPlayer();
 
         // Update state based on whether the player is detected
         UpdateState();
@@ -73,7 +79,7 @@ public class EnemyAI : MonoBehaviour
     private void UpdateState()
     {
         // Check if the player is within the sight range or raycast detection
-        if (playerInSightRange && !playerController.isHidden)
+        if ((playerInSightRange || playerInRaycast) && !playerController.isHidden)
         {
             ChasePlayer();
         }
@@ -83,42 +89,26 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    // Check for player within a cone-shaped field of view
-    private bool CheckConeForPlayer()
+    private bool CheckRaycastForPlayer()
     {
-        Vector3 origin = transform.position + new Vector3(0, raycastHeightOffset, 0);
+        Vector3 rayOrigin = transform.position + new Vector3(0, raycastHeightOffset, 0);
+        Vector3 rayDirection = transform.forward;
 
-        // OverlapSphere to get objects in the area
-        Collider[] objectsInRange = Physics.OverlapSphere(origin, raycastDistance, whatIsPlayer);
-
-        foreach (Collider col in objectsInRange)
+        if (Physics.Raycast(rayOrigin, rayDirection, out RaycastHit hit, raycastDistance, whatIsPlayer))
         {
-            if (col.CompareTag("Player"))
+            if (hit.transform.CompareTag("Player"))
             {
-                // Calculate the direction from the enemy to the player
-                Vector3 directionToPlayer = (col.transform.position - origin).normalized;
-                // Get the angle between the enemy's forward direction and the direction to the player
-                float angle = Vector3.Angle(transform.forward, directionToPlayer);
-
-                // Check if the player is within the cone's angle
-                if (angle < coneAngle / 2f)
+                PlayerController playerController = hit.transform.GetComponent<PlayerController>();
+                if (playerController != null && !playerController.isHidden)
                 {
-                    RaycastHit hit;
-                    if (Physics.Raycast(origin, directionToPlayer, out hit, raycastDistance))
-                    {
-                        if (hit.transform.CompareTag("Player"))
-                        {
-                            Debug.DrawRay(origin, directionToPlayer * raycastDistance, Color.green);  // Visualize successful detection
-                            return true;  // Player detected within the cone
-                        }
-                    }
+                    Debug.DrawRay(rayOrigin, rayDirection * raycastDistance, Color.green);
+                    return true;
                 }
             }
         }
 
-        // Visualize failure to detect player
-        Debug.DrawRay(origin, transform.forward * raycastDistance, Color.red);
-        return false;  // Player not detected
+        Debug.DrawRay(rayOrigin, rayDirection * raycastDistance, Color.red);
+        return false;
     }
 
     private void Patroling()
@@ -174,24 +164,41 @@ public class EnemyAI : MonoBehaviour
         walkPointSet = false;
     }
 
+    // This method is called when the enemy is "excised" (or killed)
     public void Excise()
     {
         Debug.Log("Enemy excised!");
-        Destroy(gameObject);  // Destroy the enemy when excised
+
+        // Drop the key when the enemy is destroyed
+        DropKey();
+
+        // Destroy the enemy object
+        Destroy(gameObject);
+    }
+
+    private void DropKey()
+    {
+        if (keyPrefab != null)
+        {
+            // Drop the key at the enemy's position or at the drop point if specified
+            Vector3 dropPosition = (dropPoint != null) ? dropPoint.position : transform.position;
+            Instantiate(keyPrefab, dropPosition, Quaternion.identity);
+            Debug.Log("Key dropped!");
+        }
+        else
+        {
+            Debug.LogWarning("No key prefab assigned to this enemy.");
+        }
     }
 
     private void OnDrawGizmosSelected()
     {
-        // Visualize the cone of view and detection range
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, sightRange);  // Normal sight range
+        Gizmos.DrawWireSphere(transform.position, sightRange);
 
-        // Draw the cone field of view as an arc
-        Vector3 coneStartDirection = Quaternion.Euler(0, -coneAngle / 2f, 0) * transform.forward;
+        Vector3 rayOrigin = transform.position + new Vector3(0, raycastHeightOffset, 0);
+        Vector3 rayDirection = transform.forward;
         Gizmos.color = Color.blue;
-        Gizmos.DrawRay(transform.position + new Vector3(0, raycastHeightOffset, 0), coneStartDirection * raycastDistance);
-
-        Gizmos.color = Color.green;
-        Gizmos.DrawRay(transform.position + new Vector3(0, raycastHeightOffset, 0), transform.forward * raycastDistance);
+        Gizmos.DrawRay(rayOrigin, rayDirection * raycastDistance);
     }
 }

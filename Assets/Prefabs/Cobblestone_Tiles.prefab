@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3524333925941651710}
   - component: {fileID: 3423893973368119854}
   - component: {fileID: 7508330106199600211}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cobblestone_Tiles
   m_TagString: Untagged
   m_Icon: {fileID: 0}

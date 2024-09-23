@@ -10,7 +10,7 @@ public class PlayerController : MonoBehaviour
     public LayerMask ground;
 
     private Vector2 inputDirection;
-    private Rigidbody rb;
+    [SerializeField] private Rigidbody rb;
     private SpriteRenderer spriteRenderer;
     private Collider playerCollider;
     public bool isHidden;
@@ -32,6 +32,8 @@ public class PlayerController : MonoBehaviour
     // Exorcism detection variables
     public float exorcismRange = 3f;  // Radius of the exorcism detection sphere
     private Collider[] enemiesInRange;
+
+    [SerializeField] private Animator _animator;
 
     private void Awake()
     {
@@ -83,6 +85,7 @@ public class PlayerController : MonoBehaviour
         {
             if (currentInteractable != null)
             {
+                _animator.Play("Will_Grab_Anim");
                 currentInteractable.InteractWith(this); // Pass the player reference
             }
             else
@@ -100,6 +103,38 @@ public class PlayerController : MonoBehaviour
             MovePlayer();
             HandleSpriteFlip();  // Handle sprite flipping based on movement direction
         }
+        if (rb.velocity.y < -0.2)
+        {
+            _animator.SetBool("Falling", true);
+            _animator.SetBool("Jumping", false);
+        } else if (rb.velocity.y == 0)
+        {
+            _animator.SetBool("Falling", false);
+            _animator.SetBool("Jumping", false);
+        } else if (rb.velocity.y > 0)
+        {
+            _animator.SetBool("Jumping", true);
+            _animator.SetBool("Falling", false);
+        }
+
+        if(rb.velocity.x == 0 && rb.velocity.z == 0)
+        {
+            _animator.SetBool("Moving", false);
+        }
+        //print (rb.velocity);
+        if (rb.velocity.z > 0f)
+        {
+            _animator.SetBool("MovingUP", true);
+        }
+        else if (rb.velocity.z < 0f)
+        {
+            _animator.SetBool("MovingDOWN", true);
+        }
+        else if (rb.velocity.z == 0f)
+        {
+            _animator.SetBool("MovingUP", false);
+            _animator.SetBool("MovingDOWN", false);
+        }
     }
 
     private void MovePlayer()
@@ -107,6 +142,8 @@ public class PlayerController : MonoBehaviour
         Vector3 movement = new Vector3(inputDirection.x, 0, inputDirection.y).normalized * moveSpeed;
         movement.y = rb.velocity.y;
         rb.velocity = movement;
+        _animator.SetBool("Moving", true);
+       
     }
 
     private void Jump()
@@ -192,6 +229,7 @@ public class PlayerController : MonoBehaviour
             // Only use the Sigil if an enemy was exorcised
             if (enemyInRange)
             {
+                _animator.Play("Will_Exorcise_Anim");
                 inventory.UseItem(excursionItemName);
                 Debug.Log("Sigil used to exorcise enemy.");
             }

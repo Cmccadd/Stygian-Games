@@ -34,6 +34,9 @@ public class PlayerController : MonoBehaviour
     private Collider[] enemiesInRange;
 
     [SerializeField] private Animator _animator;
+    [SerializeField] private GameObject _walkingSFX;
+    [SerializeField] private AudioClip _jumpingSFX;
+    [SerializeField] private AudioSource _myAudioSource;
 
     private void Awake()
     {
@@ -59,6 +62,7 @@ public class PlayerController : MonoBehaviour
         if (!isHidden)
         {
             inputDirection = value.Get<Vector2>();
+            _walkingSFX.SetActive(true);
         }
     }
 
@@ -67,6 +71,7 @@ public class PlayerController : MonoBehaviour
         if (!isHidden && value.isPressed && isGrounded())
         {
             Jump();
+            _myAudioSource.PlayOneShot(_jumpingSFX);
         }
     }
 
@@ -120,6 +125,7 @@ public class PlayerController : MonoBehaviour
         if(rb.velocity.x == 0 && rb.velocity.z == 0)
         {
             _animator.SetBool("Moving", false);
+            _walkingSFX.SetActive(false);
         }
         //print (rb.velocity);
         if (rb.velocity.z > 0f)
@@ -134,6 +140,11 @@ public class PlayerController : MonoBehaviour
         {
             _animator.SetBool("MovingUP", false);
             _animator.SetBool("MovingDOWN", false);
+        }
+
+        if (!isGrounded())
+        {
+            _walkingSFX.SetActive(false);
         }
     }
 
@@ -164,7 +175,7 @@ public class PlayerController : MonoBehaviour
         {
             rb.velocity = Vector3.zero;
             spriteRenderer.enabled = false;
-
+            
             foreach (GameObject enemy in enemies)
             {
                 Collider enemyCollider = enemy.GetComponent<Collider>();

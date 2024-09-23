@@ -30,6 +30,11 @@ public class CheckpointManager : MonoBehaviour
         }
     }
 
+    public void NewLevel()
+    {
+        LastCheckPointPos = new Vector3(0, 0, 0);
+    }
+
     /// <summary>
     /// Checks if the player is back in the menu so it can reset the players position.
     /// </summary>
@@ -43,7 +48,7 @@ public class CheckpointManager : MonoBehaviour
         if (sceneName == "Menu")
         {
             // Sets the player back to the position they start in in each level.
-            LastCheckPointPos = new Vector3(1, .84f, 2.31f);
+            LastCheckPointPos = new Vector3(0, 0, 0);
         }
     }
 }

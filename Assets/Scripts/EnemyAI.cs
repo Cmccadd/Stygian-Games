@@ -26,11 +26,12 @@ public class EnemyAI : MonoBehaviour
     private float chaseTimer;
 
     [Header("Detection Settings")]
-    public float sightRange;
+    public float sightRange = 10f;
+    public float coneAngle = 45f;  // Cone angle for field of view detection
     public bool playerInSightRange;
 
     [Header("Raycast Detection Settings")]
-    public float raycastDistance = 10f;
+    public float raycastDistance = 20f;  // Extended distance for cone detection
     public float raycastHeightOffset = 1.5f;
     private bool playerInRaycast;
 
@@ -45,10 +46,7 @@ public class EnemyAI : MonoBehaviour
     private void Update()
     {
         // Check if the player is in sight range and not hidden
-        playerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer) && !playerController.isHidden;
-
-        // Perform raycast to check for player and ensure player is not hidden
-        playerInRaycast = CheckRaycastForPlayer();
+        playerInSightRange = CheckConeForPlayer() && !playerController.isHidden;
 
         // Update state based on whether the player is detected
         UpdateState();
@@ -75,7 +73,7 @@ public class EnemyAI : MonoBehaviour
     private void UpdateState()
     {
         // Check if the player is within the sight range or raycast detection
-        if ((playerInSightRange || playerInRaycast) && !playerController.isHidden)
+        if (playerInSightRange && !playerController.isHidden)
         {
             ChasePlayer();
         }
@@ -85,26 +83,42 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    private bool CheckRaycastForPlayer()
+    // Check for player within a cone-shaped field of view
+    private bool CheckConeForPlayer()
     {
-        Vector3 rayOrigin = transform.position + new Vector3(0, raycastHeightOffset, 0);
-        Vector3 rayDirection = transform.forward;
+        Vector3 origin = transform.position + new Vector3(0, raycastHeightOffset, 0);
 
-        if (Physics.Raycast(rayOrigin, rayDirection, out RaycastHit hit, raycastDistance, whatIsPlayer))
+        // OverlapSphere to get objects in the area
+        Collider[] objectsInRange = Physics.OverlapSphere(origin, raycastDistance, whatIsPlayer);
+
+        foreach (Collider col in objectsInRange)
         {
-            if (hit.transform.CompareTag("Player"))
+            if (col.CompareTag("Player"))
             {
-                PlayerController playerController = hit.transform.GetComponent<PlayerController>();
-                if (playerController != null && !playerController.isHidden)
+                // Calculate the direction from the enemy to the player
+                Vector3 directionToPlayer = (col.transform.position - origin).normalized;
+                // Get the angle between the enemy's forward direction and the direction to the player
+                float angle = Vector3.Angle(transform.forward, directionToPlayer);
+
+                // Check if the player is within the cone's angle
+                if (angle < coneAngle / 2f)
                 {
-                    Debug.DrawRay(rayOrigin, rayDirection * raycastDistance, Color.green);
-                    return true;
+                    RaycastHit hit;
+                    if (Physics.Raycast(origin, directionToPlayer, out hit, raycastDistance))
+                    {
+                        if (hit.transform.CompareTag("Player"))
+                        {
+                            Debug.DrawRay(origin, directionToPlayer * raycastDistance, Color.green);  // Visualize successful detection
+                            return true;  // Player detected within the cone
+                        }
+                    }
                 }
             }
         }
 
-        Debug.DrawRay(rayOrigin, rayDirection * raycastDistance, Color.red);
-        return false;
+        // Visualize failure to detect player
+        Debug.DrawRay(origin, transform.forward * raycastDistance, Color.red);
+        return false;  // Player not detected
     }
 
     private void Patroling()
@@ -168,12 +182,16 @@ public class EnemyAI : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
+        // Visualize the cone of view and detection range
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, sightRange);
+        Gizmos.DrawWireSphere(transform.position, sightRange);  // Normal sight range
 
-        Vector3 rayOrigin = transform.position + new Vector3(0, raycastHeightOffset, 0);
-        Vector3 rayDirection = transform.forward;
+        // Draw the cone field of view as an arc
+        Vector3 coneStartDirection = Quaternion.Euler(0, -coneAngle / 2f, 0) * transform.forward;
         Gizmos.color = Color.blue;
-        Gizmos.DrawRay(rayOrigin, rayDirection * raycastDistance);
+        Gizmos.DrawRay(transform.position + new Vector3(0, raycastHeightOffset, 0), coneStartDirection * raycastDistance);
+
+        Gizmos.color = Color.green;
+        Gizmos.DrawRay(transform.position + new Vector3(0, raycastHeightOffset, 0), transform.forward * raycastDistance);
     }
 }

@@ -12,6 +12,9 @@ EditorBuildSettings:
     path: Assets/Scenes/Game Scenes/Prototype_Scene.unity
     guid: 79c0213b9c654a54dbad24b417518d1e
   - enabled: 1
+    path: Assets/Scenes/Game Scenes/Prototype_Scene_2.unity
+    guid: dde4d7f38bad75b44b6b822ff1dac984
+  - enabled: 1
     path: Assets/Scenes/Game Scenes/Scene 1.unity
     guid: b90e1e77b2ae55445b57d94f178c0179
   - enabled: 1

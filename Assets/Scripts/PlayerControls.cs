@@ -95,8 +95,16 @@ public class PlayerController : MonoBehaviour
             }
             else
             {
-                // Check for enemies in the exorcism range before using the Sigil
-                UseExcursionItemOnEnemies();
+                // Prevent exorcizing if the player is hidden
+                if (!isHidden)
+                {
+                    // Check for enemies in the exorcism range before using the Sigil
+                    UseExcursionItemOnEnemies();
+                }
+                else
+                {
+                    Debug.Log("Cannot exorcize while hidden.");
+                }
             }
         }
     }
@@ -112,22 +120,24 @@ public class PlayerController : MonoBehaviour
         {
             _animator.SetBool("Falling", true);
             _animator.SetBool("Jumping", false);
-        } else if (rb.velocity.y <= 0 && rb.velocity.y > -.5)
+        }
+        else if (rb.velocity.y <= 0 && rb.velocity.y > -.5)
         {
             _animator.SetBool("Falling", false);
             _animator.SetBool("Jumping", false);
-        } else if (rb.velocity.y > 0 && !isGrounded())
+        }
+        else if (rb.velocity.y > 0 && !isGrounded())
         {
             _animator.SetBool("Jumping", true);
             _animator.SetBool("Falling", false);
         }
 
-        if(rb.velocity.x == 0 && rb.velocity.z == 0)
+        if (rb.velocity.x == 0 && rb.velocity.z == 0)
         {
             _animator.SetBool("Moving", false);
             _walkingSFX.SetActive(false);
         }
-        //print (rb.velocity);
+
         if (rb.velocity.z > 0f)
         {
             _animator.SetBool("MovingUP", true);
@@ -154,7 +164,6 @@ public class PlayerController : MonoBehaviour
         movement.y = rb.velocity.y;
         rb.velocity = movement;
         _animator.SetBool("Moving", true);
-       
     }
 
     private void Jump()
@@ -175,7 +184,7 @@ public class PlayerController : MonoBehaviour
         {
             rb.velocity = Vector3.zero;
             spriteRenderer.enabled = false;
-            
+
             foreach (GameObject enemy in enemies)
             {
                 Collider enemyCollider = enemy.GetComponent<Collider>();
@@ -273,8 +282,6 @@ public class PlayerController : MonoBehaviour
             insideHideSpot = true;
         }
     }
-
-
 
     private void OnTriggerExit(Collider other)
     {

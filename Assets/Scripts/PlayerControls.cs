@@ -31,8 +31,6 @@ public class PlayerController : MonoBehaviour
     public float exorcismRange = 3f;  // Radius of the exorcism detection sphere
     private Collider[] enemiesInRange;
 
-    private bool isFacingRight = true; // Track the last facing direction
-
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -57,7 +55,6 @@ public class PlayerController : MonoBehaviour
         if (!isHidden)
         {
             inputDirection = value.Get<Vector2>();
-            UpdateSpriteFlip();
         }
     }
 
@@ -88,7 +85,7 @@ public class PlayerController : MonoBehaviour
             }
             else
             {
-                // Check for enemies in the exorcism range
+                // Check for enemies in the exorcism range before using the Sigil
                 UseExcursionItemOnEnemies();
             }
         }
@@ -99,6 +96,7 @@ public class PlayerController : MonoBehaviour
         if (!isHidden)
         {
             MovePlayer();
+            spriteRenderer.flipX = rb.velocity.x < 0f;
         }
     }
 
@@ -154,43 +152,38 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // Update sprite flip direction based on movement
-    private void UpdateSpriteFlip()
-    {
-        if (inputDirection.x > 0 && !isFacingRight)
-        {
-            FlipSprite(true);  // Face right
-        }
-        else if (inputDirection.x < 0 && isFacingRight)
-        {
-            FlipSprite(false); // Face left
-        }
-    }
-
-    // Flip the sprite based on movement direction
-    private void FlipSprite(bool faceRight)
-    {
-        isFacingRight = faceRight;
-        spriteRenderer.flipX = !faceRight;
-    }
-
     // Check for enemies in the exorcism range and use the excursion item if available
     private void UseExcursionItemOnEnemies()
     {
+        // Check if the player has the required excursion item in the inventory
         if (inventory.HasItem(excursionItemName))
         {
+            // Get all colliders in the exorcism range
             enemiesInRange = Physics.OverlapSphere(transform.position, exorcismRange, LayerMask.GetMask("Enemy"));
+
+            bool enemyInRange = false; // Track if any enemy is in range
 
             foreach (Collider enemyCollider in enemiesInRange)
             {
                 EnemyAI enemy = enemyCollider.GetComponent<EnemyAI>();
                 if (enemy != null)
                 {
+                    // Exorcise the enemy and set flag
                     enemy.Excise();
+                    enemyInRange = true; // Mark that an enemy was in range
                 }
             }
 
-            inventory.UseItem(excursionItemName);
+            // Only use the Sigil if an enemy was exorcised
+            if (enemyInRange)
+            {
+                inventory.UseItem(excursionItemName);
+                Debug.Log("Sigil used to exorcise enemy.");
+            }
+            else
+            {
+                Debug.Log("No enemy in exorcism range. Sigil not used.");
+            }
         }
         else
         {

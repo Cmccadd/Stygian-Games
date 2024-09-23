@@ -36,7 +36,9 @@ public class EnemyAI : MonoBehaviour
 
     [Header("Key Drop Settings")]
     public GameObject keyPrefab;  // Reference to the key prefab
-    public Transform dropPosition;  // Position where the key should drop (usually same as enemy position)
+    public Transform dropPosition;  // Optional: Position where the key should drop
+
+    private bool isExcised = false; // Prevent multiple excision calls
 
     private void Start()
     {
@@ -170,21 +172,34 @@ public class EnemyAI : MonoBehaviour
         walkPointSet = false;
     }
 
+    // Ensures excision only happens once per enemy
     public void Excise()
     {
+        if (isExcised) return; // Prevent multiple excise calls
+
         Debug.Log("Enemy excised!");
+        isExcised = true;
 
         // Drop the key when the enemy is excised
-        if (keyPrefab != null && dropPosition != null)
+        DropKey();
+
+        // Delayed destroy to allow key drop to occur properly
+        Destroy(gameObject, 0.1f);  // Slight delay to ensure key dropping works
+    }
+
+    private void DropKey()
+    {
+        // Drop the key at the enemy's position (if no specific drop position is set, use enemy's transform)
+        if (keyPrefab != null)
         {
-            Instantiate(keyPrefab, dropPosition.position, Quaternion.identity);  // Drop the key at the enemy's position
+            Vector3 dropPos = (dropPosition != null) ? dropPosition.position : transform.position;  // Use dropPosition if set, otherwise enemy's position
+            Instantiate(keyPrefab, dropPos, Quaternion.identity);  // Drop the key at the calculated position
+            Debug.Log("Key dropped.");
         }
         else
         {
-            Debug.LogWarning("Key prefab or drop position is not set.");
+            Debug.LogWarning("Key prefab is not set.");
         }
-
-        Destroy(gameObject);  // Destroy the enemy when excised
     }
 
     private void OnDrawGizmosSelected()

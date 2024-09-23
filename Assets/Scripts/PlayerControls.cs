@@ -108,15 +108,15 @@ public class PlayerController : MonoBehaviour
             MovePlayer();
             HandleSpriteFlip();  // Handle sprite flipping based on movement direction
         }
-        if (rb.velocity.y < -0.2)
+        if (rb.velocity.y < -.5 && !isGrounded())
         {
             _animator.SetBool("Falling", true);
             _animator.SetBool("Jumping", false);
-        } else if (rb.velocity.y == 0)
+        } else if (rb.velocity.y <= 0 && rb.velocity.y > -.5)
         {
             _animator.SetBool("Falling", false);
             _animator.SetBool("Jumping", false);
-        } else if (rb.velocity.y > 0)
+        } else if (rb.velocity.y > 0 && !isGrounded())
         {
             _animator.SetBool("Jumping", true);
             _animator.SetBool("Falling", false);

@@ -1498,7 +1498,12 @@ PrefabInstance:
       propertyPath: m_Name
       value: Cobblestone_Tiles
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 7508330106199600211, guid: bf7c3aa64166def489fb050d2789fbae, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 7508330106199600211, guid: bf7c3aa64166def489fb050d2789fbae, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 864738a82126ca4479823d4a5f034e7c, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -3331,11 +3331,16 @@ MonoBehaviour:
   ground:
     serializedVersion: 2
     m_Bits: 64
+  rb: {fileID: 0}
   isHidden: 0
   _checkpointManager: {fileID: 338540911}
   inventory: {fileID: 1817727785}
   excursionItemName: Sigil
   exorcismRange: 5
+  _animator: {fileID: 0}
+  _walkingSFX: {fileID: 0}
+  _jumpingSFX: {fileID: 0}
+  _myAudioSource: {fileID: 0}
 --- !u!212 &8131984730855957280
 SpriteRenderer:
   m_ObjectHideFlags: 0

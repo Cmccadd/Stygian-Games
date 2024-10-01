@@ -36,7 +36,9 @@ public class EnemyAI : MonoBehaviour
 
     [Header("Key Drop Settings")]
     public GameObject keyPrefab;  // Reference to the key prefab
-    public Transform dropPoint;   // Optional: a specific point where the key will be dropped (default is enemy position)
+    public Transform dropPosition;  // Optional: Position where the key should drop
+
+    private bool isExcised = false; // Prevent multiple excision calls
 
     private void Start()
     {
@@ -48,6 +50,13 @@ public class EnemyAI : MonoBehaviour
 
     private void Update()
     {
+        // Check if the player is hidden
+        if (playerController.isHidden)
+        {
+            Patroling();
+            return; // Exit detection logic if the player is hidden
+        }
+
         // Check if the player is in sight range and not hidden
         playerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer) && !playerController.isHidden;
 
@@ -78,7 +87,6 @@ public class EnemyAI : MonoBehaviour
 
     private void UpdateState()
     {
-        // Check if the player is within the sight range or raycast detection
         if ((playerInSightRange || playerInRaycast) && !playerController.isHidden)
         {
             ChasePlayer();
@@ -164,30 +172,33 @@ public class EnemyAI : MonoBehaviour
         walkPointSet = false;
     }
 
-    // This method is called when the enemy is "excised" (or killed)
+    // Ensures excision only happens once per enemy
     public void Excise()
     {
-        Debug.Log("Enemy excised!");
+        if (isExcised) return; // Prevent multiple excise calls
 
-        // Drop the key when the enemy is destroyed
+        Debug.Log("Enemy excised!");
+        isExcised = true;
+
+        // Drop the key when the enemy is excised
         DropKey();
 
-        // Destroy the enemy object
-        Destroy(gameObject);
+        // Delayed destroy to allow key drop to occur properly
+        Destroy(gameObject, 0.1f);  // Slight delay to ensure key dropping works
     }
 
     private void DropKey()
     {
+        // Drop the key at the enemy's position (if no specific drop position is set, use enemy's transform)
         if (keyPrefab != null)
         {
-            // Drop the key at the enemy's position or at the drop point if specified
-            Vector3 dropPosition = (dropPoint != null) ? dropPoint.position : transform.position;
-            Instantiate(keyPrefab, dropPosition, Quaternion.identity);
-            Debug.Log("Key dropped!");
+            Vector3 dropPos = (dropPosition != null) ? dropPosition.position : transform.position;  // Use dropPosition if set, otherwise enemy's position
+            Instantiate(keyPrefab, dropPos, Quaternion.identity);  // Drop the key at the calculated position
+            Debug.Log("Key dropped.");
         }
         else
         {
-            Debug.LogWarning("No key prefab assigned to this enemy.");
+            Debug.LogWarning("Key prefab is not set.");
         }
     }
 

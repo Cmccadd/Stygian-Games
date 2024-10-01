@@ -60,6 +60,14 @@ PrefabInstance:
       propertyPath: patrolPoints.Array.data[7]
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 2567487185349704570, guid: 0ebd3992b7f095b40972913d2c00752a, type: 3}
+      propertyPath: m_Height
+      value: 2.7413683
+      objectReference: {fileID: 0}
+    - target: {fileID: 2567487185349704570, guid: 0ebd3992b7f095b40972913d2c00752a, type: 3}
+      propertyPath: m_Center.y
+      value: 0.37069044
+      objectReference: {fileID: 0}
     - target: {fileID: 3040872601106287666, guid: 0ebd3992b7f095b40972913d2c00752a, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
@@ -70,7 +78,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3667990150424023089, guid: 0ebd3992b7f095b40972913d2c00752a, type: 3}
       propertyPath: m_Name
-      value: Enemy Variant
+      value: Priest
       objectReference: {fileID: 0}
     - target: {fileID: 3667990150424023089, guid: 0ebd3992b7f095b40972913d2c00752a, type: 3}
       propertyPath: m_Layer
@@ -133,7 +141,8 @@ PrefabInstance:
       value: 9999
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 3490552213802384733, guid: 0ebd3992b7f095b40972913d2c00752a, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 5284763225373151536, guid: 0ebd3992b7f095b40972913d2c00752a, type: 3}
       insertIndex: -1

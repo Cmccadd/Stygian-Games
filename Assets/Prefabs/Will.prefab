@@ -360,7 +360,7 @@ MonoBehaviour:
   - {x: 1.5, y: -1.5, z: 0}
   m_ShapePathHash: 0
   m_Mesh: {fileID: 0}
-  m_InstanceId: 32684
+  m_InstanceId: 49646
   m_LocalBounds:
     m_Center: {x: 0, y: 0, z: 0}
     m_Extent: {x: 1.5, y: 1.5, z: 0}
@@ -421,7 +421,7 @@ Transform:
   m_GameObject: {fileID: 8680433167111954247}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 59.833664, y: -1.1149349, z: 8.754825}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -437,7 +437,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 9cb0f27fe0f820c4aac75786fab38242, type: 3}
+  m_audioClip: {fileID: 8300000, guid: b16ec767c71844d4b820be72aa4b01df, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1

@@ -95,12 +95,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5261c9cfb099d56409278219f2fdb982, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  intIcon: {fileID: 0}
   lightOn: {fileID: 2970960786090720949}
   lightOff: {fileID: 946680971037758607}
   switchOn: {fileID: 8071453974617563665}
   switchOff: {fileID: 594054235831478059}
   toggle: 1
+  _leverpull: {fileID: 0}
+  _leverAnimator: {fileID: 0}
+  _levelAudioSource: {fileID: 0}
 --- !u!212 &8167054892125528079
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -583,6 +585,7 @@ GameObject:
   - component: {fileID: 4798724859923649879}
   - component: {fileID: 9112991651561223801}
   - component: {fileID: 6451289330333568125}
+  - component: {fileID: 6118100302074944816}
   m_Layer: 0
   m_Name: LeverOn
   m_TagString: Untagged
@@ -665,12 +668,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5261c9cfb099d56409278219f2fdb982, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  intIcon: {fileID: 0}
   lightOn: {fileID: 2970960786090720949}
   lightOff: {fileID: 946680971037758607}
   switchOn: {fileID: 8071453974617563665}
   switchOff: {fileID: 594054235831478059}
   toggle: 0
+  _leverpull: {fileID: 8300000, guid: 2fbd3c18899e5bc4fbf112c0cff5b0d0, type: 3}
+  _leverAnimator: {fileID: 6118100302074944816}
+  _levelAudioSource: {fileID: 0}
 --- !u!212 &6451289330333568125
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -712,7 +717,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 1953618372, guid: db5aa790e7bcae64e9fbf31d63c205c1, type: 3}
+  m_Sprite: {fileID: -451270744, guid: db5aa790e7bcae64e9fbf31d63c205c1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -723,3 +728,24 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!95 &6118100302074944816
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8071453974617563665}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: f3817056b5010bc4687d76e4a94a88a7, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

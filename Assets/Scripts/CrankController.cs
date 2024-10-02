@@ -8,6 +8,7 @@ public class CrankController : Interactable
     public bool PlayerInteracting;
     [SerializeField] private int _crankCooldown = 2;
     [SerializeField] private int _crankRate = 5;
+    [SerializeField] Animator _crankAnimator;
 
     // InteractWith now takes a PlayerController parameter to match the base class
     public override void InteractWith(PlayerController player)
@@ -15,6 +16,7 @@ public class CrankController : Interactable
         base.InteractWith(player);
         PlayerInteracting = true;
         StartCoroutine(Cranking());
+        _crankAnimator.SetBool("Cranking", true);
     }
 
     private void OnTriggerExit(Collider other)
@@ -23,6 +25,7 @@ public class CrankController : Interactable
         {
             PlayerInteracting = false;
             Rigidbody.velocity = new Vector3(0, -_crankRate / 2, 0); // Stop or reverse the crank
+            _crankAnimator.SetBool("Cranking", false);
         }
     }
 

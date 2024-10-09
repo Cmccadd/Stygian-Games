@@ -4,6 +4,7 @@ using UnityEngine;
 public class CrankController : Interactable
 {
     public GameObject Gate;
+    public GameObject CrankSFX;
     public Rigidbody Rigidbody;
     public bool PlayerInteracting;
     [SerializeField] private int _crankCooldown = 2;
@@ -17,6 +18,7 @@ public class CrankController : Interactable
         PlayerInteracting = true;
         StartCoroutine(Cranking());
         _crankAnimator.SetBool("Cranking", true);
+        CrankSFX.SetActive(true);
     }
 
     private void OnTriggerExit(Collider other)
@@ -26,6 +28,7 @@ public class CrankController : Interactable
             PlayerInteracting = false;
             Rigidbody.velocity = new Vector3(0, -_crankRate / 2, 0); // Stop or reverse the crank
             _crankAnimator.SetBool("Cranking", false);
+            CrankSFX.SetActive(false);
         }
     }
 

@@ -69,6 +69,7 @@ MonoBehaviour:
   _animator: {fileID: 3439636527736359923}
   _walkingSFX: {fileID: 8680433167111954247}
   _jumpingSFX: {fileID: 8300000, guid: 07a42017f63aef448b15602f9b24a05c, type: 3}
+  _grabSFX: {fileID: 8300000, guid: 55e7225fdc5bcc144aea9866a730b02c, type: 3}
   _myAudioSource: {fileID: 632341131956894828}
 --- !u!114 &8639179895854124364
 MonoBehaviour:
@@ -360,7 +361,7 @@ MonoBehaviour:
   - {x: 1.5, y: -1.5, z: 0}
   m_ShapePathHash: 0
   m_Mesh: {fileID: 0}
-  m_InstanceId: 49646
+  m_InstanceId: 38718
   m_LocalBounds:
     m_Center: {x: 0, y: 0, z: 0}
     m_Extent: {x: 1.5, y: 1.5, z: 0}

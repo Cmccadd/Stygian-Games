@@ -214,10 +214,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.39008728
+  m_Radius: 0.36878735
   m_Height: 2.125917
   m_Direction: 1
-  m_Center: {x: -0.09613454, y: -0.43703872, z: 0}
+  m_Center: {x: -0.09613454, y: -0.43703866, z: 0.021299899}
 --- !u!95 &3439636527736359923
 Animator:
   serializedVersion: 5
@@ -361,7 +361,7 @@ MonoBehaviour:
   - {x: 1.5, y: -1.5, z: 0}
   m_ShapePathHash: 0
   m_Mesh: {fileID: 0}
-  m_InstanceId: 38718
+  m_InstanceId: 43410
   m_LocalBounds:
     m_Center: {x: 0, y: 0, z: 0}
     m_Extent: {x: 1.5, y: 1.5, z: 0}

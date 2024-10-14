@@ -139,6 +139,10 @@ public class PlayerController : MonoBehaviour
             _animator.SetBool("Moving", false);
             _walkingSFX.SetActive(false);
         }
+        else if (rb.velocity.x != 0 && rb.velocity.y == 0 || rb.velocity.z != 0 && rb.velocity.y == 0)
+        {
+            _walkingSFX.SetActive(true);
+        }
 
         if (rb.velocity.z > 0f)
         {

@@ -1,13 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class LeverController : Interactable
 {
-    public GameObject intIcon, lightOn, lightOff, switchOn, switchOff;
+    public GameObject /*intIcon, */lightOn, lightOff, switchOn, switchOff;
     public bool toggle;
     //public AudioSource switchSound;
-
+    [SerializeField] private AudioClip _leverpull;
+    [SerializeField] private Animator _leverAnimator;
+    [SerializeField] private AudioSource _levelAudioSource;
 
     public override void InteractWith(PlayerController player)
     {
@@ -16,50 +16,31 @@ public class LeverController : Interactable
         {
             lightOn.SetActive(true);
             lightOff.SetActive(false);
-            switchOn.SetActive(true);
-            switchOff.SetActive(false);
+            _leverAnimator.SetBool("Off", true);
+            //switchOn.SetActive(true);
+            //switchOff.SetActive(false);
+            _levelAudioSource.PlayOneShot(_leverpull);
             //switchSound.Play();
+            toggle = false;
         }
-        if (toggle == false)
+        else if (toggle == false)
         {
             lightOn.SetActive(false);
             lightOff.SetActive(true);
-            switchOn.SetActive(false);
-            switchOff.SetActive(true);
+            _leverAnimator.SetBool("Off", false);
+            //switchOn.SetActive(false);
+            //switchOff.SetActive(true);
+            _levelAudioSource.PlayOneShot(_leverpull);
             //switchSound.Play();
+            toggle = true;
         }
     }
-    //void OnTriggerStay(Collider other)
+    
+    //void OnTriggerExit(Collider other)
     //{
-    //    if (other.CompareTag("Player"))
+    //    if (other.CompareTag("MainCamera"))
     //    {
-    //        intIcon.SetActive(true);
-    //        if (Input.GetKeyDown(KeyCode.E))
-    //        {
-    //            if (toggle == true)
-    //            {
-    //                lightOn.SetActive(true);
-    //                lightOff.SetActive(false);
-    //                switchOn.SetActive(true);
-    //                switchOff.SetActive(false);
-    //                //switchSound.Play();
-    //            }
-    //            if (toggle == false)
-    //            {
-    //                lightOn.SetActive(false);
-    //                lightOff.SetActive(true);
-    //                switchOn.SetActive(false);
-    //                switchOff.SetActive(true);
-    //                //switchSound.Play();
-    //            }
-    //        }
+    //        intIcon.SetActive(false);
     //    }
     //}
-    void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("MainCamera"))
-        {
-            intIcon.SetActive(false);
-        }
-    }
 }

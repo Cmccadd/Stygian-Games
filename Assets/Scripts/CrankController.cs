@@ -37,6 +37,6 @@ public class CrankController : Interactable
         // Simulate crank operation with a cooldown
         Rigidbody.velocity = new Vector3(0, _crankRate, 0);
         yield return new WaitForSeconds(_crankCooldown);
-        Rigidbody.velocity = Vector3.zero; // Stop the crank after cooldown
+        //Rigidbody.velocity = Vector3.zero; // Stop the crank after cooldown
     }
 }

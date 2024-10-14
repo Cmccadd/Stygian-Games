@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class LeverController : Interactable
 {
-    public GameObject /*intIcon, */lightOn, lightOff, switchOn, switchOff;
+    public GameObject /*intIcon, */lightOn, lightOff/* switchOn, switchOff*/;
     public bool toggle;
     //public AudioSource switchSound;
     [SerializeField] private AudioClip _leverpull;

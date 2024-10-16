@@ -1606,6 +1606,10 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Environment
       objectReference: {fileID: 0}
+    - target: {fileID: 2721490484791268154, guid: 5f9dc040a6594a44a89daf46dfbb56e3, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 7ec4e7373ac023f42bc829945cdcdf38, type: 2}
     - target: {fileID: 7865386714916806775, guid: 5f9dc040a6594a44a89daf46dfbb56e3, type: 3}
       propertyPath: m_LocalScale.x
       value: 33.865482

@@ -36,6 +36,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Animator _animator;
     [SerializeField] private GameObject _walkingSFX;
     [SerializeField] private AudioClip _jumpingSFX;
+    [SerializeField] private AudioClip _grabSFX;
     [SerializeField] private AudioSource _myAudioSource;
 
     private void Awake()
@@ -92,6 +93,7 @@ public class PlayerController : MonoBehaviour
             {
                 _animator.Play("Will_Grab_Anim");
                 currentInteractable.InteractWith(this); // Pass the player reference
+                _myAudioSource.PlayOneShot(_grabSFX);
             }
             else
             {
@@ -136,6 +138,10 @@ public class PlayerController : MonoBehaviour
         {
             _animator.SetBool("Moving", false);
             _walkingSFX.SetActive(false);
+        }
+        else if (rb.velocity.x != 0 && rb.velocity.y == 0 || rb.velocity.z != 0 && rb.velocity.y == 0)
+        {
+            _walkingSFX.SetActive(true);
         }
 
         if (rb.velocity.z > 0f)

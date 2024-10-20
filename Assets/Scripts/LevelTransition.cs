@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 public class LevelTransition : MonoBehaviour
 {
     [SerializeField] private CheckpointManager _checkpointManager;
+    [SerializeField] private GameObject _fadeOut;
     private void Start()
     {
         _checkpointManager = FindObjectOfType<CheckpointManager>();
@@ -13,7 +14,8 @@ public class LevelTransition : MonoBehaviour
         if (other.tag == "Player")
         {
             _checkpointManager.NewLevel();
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+            _fadeOut.SetActive(true);
+            //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
         }
     }
 }

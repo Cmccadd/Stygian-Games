@@ -36,6 +36,7 @@ public class PlayerController : MonoBehaviour
     private Collider[] enemiesInRange;
 
     [SerializeField] private Animator _animator;
+    [SerializeField] private Animator _enemyNoticeAnimator;
     [SerializeField] private GameObject _walkingSFX;
     [SerializeField] private AudioClip _jumpingSFX;
     [SerializeField] private AudioClip _grabSFX;
@@ -195,6 +196,7 @@ public class PlayerController : MonoBehaviour
         {
             rb.velocity = Vector3.zero;
             _animator.SetBool("Hiding", true);
+            _enemyNoticeAnimator.SetBool("Hidden", true);
             //spriteRenderer.enabled = false;
 
             foreach (GameObject enemy in enemies)
@@ -210,6 +212,7 @@ public class PlayerController : MonoBehaviour
         else
         {
             _animator.SetBool("Hiding", false);
+            _enemyNoticeAnimator.SetBool("Hidden", false);
             //spriteRenderer.enabled = true;
 
             foreach (GameObject enemy in enemies)

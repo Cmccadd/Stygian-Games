@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     private bool nearHideableObject;
     private bool insideHideSpot;  // Track if inside hideable object
     private GameObject[] enemies;
+    [SerializeField] private GameObject _hideIndicator;
     private Interactable currentInteractable;
 
     private bool facingLeft = false;  // To track the last direction faced
@@ -193,7 +194,8 @@ public class PlayerController : MonoBehaviour
         if (isHidden)
         {
             rb.velocity = Vector3.zero;
-            spriteRenderer.enabled = false;
+            _animator.SetBool("Hiding", true);
+            //spriteRenderer.enabled = false;
 
             foreach (GameObject enemy in enemies)
             {
@@ -207,7 +209,8 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            spriteRenderer.enabled = true;
+            _animator.SetBool("Hiding", false);
+            //spriteRenderer.enabled = true;
 
             foreach (GameObject enemy in enemies)
             {
@@ -300,6 +303,7 @@ public class PlayerController : MonoBehaviour
         if (other.CompareTag("Hideable"))
         {
             insideHideSpot = false; // Reset when leaving hideable area
+            _hideIndicator.SetActive(false);
         }
     }
 
@@ -308,6 +312,7 @@ public class PlayerController : MonoBehaviour
         if (other.CompareTag("Hideable"))
         {
             nearHideableObject = true;
+            _hideIndicator.SetActive(true);
         }
         if (other.CompareTag("Cutscene"))
         {

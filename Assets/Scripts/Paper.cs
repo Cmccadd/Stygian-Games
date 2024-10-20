@@ -5,6 +5,7 @@ public class Paper : Interactable
     //public InventoryItem paperItem; // Reference to the ScriptableObject for the item
     [SerializeField] private bool _imageOn;
     [SerializeField] private GameObject _image;
+    [SerializeField] private GameObject _interactIcon;
 
     public override void InteractWith(PlayerController player)
     {
@@ -33,5 +34,20 @@ public class Paper : Interactable
         //{
           //  Debug.Log("Failed to add item to inventory.");
         //}
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
+            _interactIcon.SetActive(true);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
+            _interactIcon.SetActive(false);
+        }
     }
 }

@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Collider playerCollider;
     public bool isHidden;
+    public bool dying;
     private bool nearHideableObject;
     private bool insideHideSpot;  // Track if inside hideable object
     private GameObject[] enemies;
@@ -60,7 +61,7 @@ public class PlayerController : MonoBehaviour
 
     public void OnMove(InputValue value)
     {
-        if (!isHidden)
+        if (!isHidden && !dying)
         {
             inputDirection = value.Get<Vector2>();
             _walkingSFX.SetActive(true);
@@ -69,7 +70,7 @@ public class PlayerController : MonoBehaviour
 
     public void OnJump(InputValue value)
     {
-        if (!isHidden && value.isPressed && isGrounded())
+        if (!isHidden && value.isPressed && isGrounded() && dying == false)
         {
             Jump();
             _myAudioSource.PlayOneShot(_jumpingSFX);
@@ -113,7 +114,7 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!isHidden)
+        if (!isHidden || dying == false)
         {
             MovePlayer();
             HandleSpriteFlip();  // Handle sprite flipping based on movement direction
@@ -166,10 +167,13 @@ public class PlayerController : MonoBehaviour
 
     private void MovePlayer()
     {
-        Vector3 movement = new Vector3(inputDirection.x, 0, inputDirection.y).normalized * moveSpeed;
-        movement.y = rb.velocity.y;
-        rb.velocity = movement;
-        _animator.SetBool("Moving", true);
+        if (dying == false)
+        { 
+           Vector3 movement = new Vector3(inputDirection.x, 0, inputDirection.y).normalized * moveSpeed;
+            movement.y = rb.velocity.y;
+            rb.velocity = movement;
+            _animator.SetBool("Moving", true);
+        }
     }
 
     private void Jump()
@@ -305,6 +309,10 @@ public class PlayerController : MonoBehaviour
         {
             nearHideableObject = true;
         }
+        if (other.CompareTag("Cutscene"))
+        {
+            dying = true;
+        }
     }
 
     // Visualize the exorcism detection range using Gizmos in the Scene view
@@ -315,5 +323,10 @@ public class PlayerController : MonoBehaviour
             Gizmos.color = Color.green;
             Gizmos.DrawWireSphere(transform.position, exorcismRange);
         }
+    }
+
+    public void Dead()
+    {
+        dying = true;
     }
 }

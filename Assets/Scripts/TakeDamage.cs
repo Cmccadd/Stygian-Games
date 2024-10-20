@@ -6,8 +6,10 @@ using UnityEngine.SceneManagement;
 public class TakeDamage : MonoBehaviour
 {
     public float healthCount = 3; // Keep track of how much health the player has
-    public GameObject gameOver; // Grab the Game Over screen object
+    public GameObject _deathTransition; // Grab the Game Over screen object
     public GameManager gameManager;
+    [SerializeField] private Animator _animator;
+    public PlayerController playerController;
 
     // If the player collides with an enemy, reduce health by 1
     private void OnCollisionEnter(Collision collision)
@@ -19,8 +21,10 @@ public class TakeDamage : MonoBehaviour
             // If health reaches zero, trigger a game over
             if (healthCount <= 0 )
             {
-                gameOver.SetActive(true);
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                playerController.Dead();
+                _animator.SetBool("Die", true);
+                _deathTransition.SetActive(true);
+                //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
         } 
     }
@@ -33,8 +37,10 @@ public class TakeDamage : MonoBehaviour
             // If health reaches zero, trigger a game over
             if (healthCount <= 0)
             {
-                gameOver.SetActive(true);
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                playerController.Dead();
+                _animator.SetBool("Die", true);
+                _deathTransition.SetActive(true);
+                //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
         }
     }

@@ -21,6 +21,11 @@ public class MenuControls : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
 
+    public void Reset()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
     /// <summary>
     /// Quits the game.
     /// </summary>

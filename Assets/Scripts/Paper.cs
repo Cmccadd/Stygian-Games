@@ -49,5 +49,11 @@ public class Paper : Interactable
         {
             _interactIcon.SetActive(false);
         }
+
+        if (_imageOn == true)
+        {
+            _imageOn = false;
+            _image.SetActive(false);
+        }
     }
 }

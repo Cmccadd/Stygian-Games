@@ -13,6 +13,7 @@ public class CombinationLock : MonoBehaviour
     [SerializeField] private bool _t2On;
     [SerializeField] private bool _t3On;
     [SerializeField] private bool _t4On;
+    [SerializeField] private bool _puzzleComplete;
     [SerializeField] private AudioClip _doorOpen;
     [SerializeField] private AudioSource _myAudioSource;
 
@@ -22,6 +23,10 @@ public class CombinationLock : MonoBehaviour
         if (_torch1.activeInHierarchy == true)
         {
             _t1On = true;
+        }
+        else
+        {
+            _t1On = false;
         }
         if (_torch2.activeInHierarchy == true)
         {
@@ -35,14 +40,16 @@ public class CombinationLock : MonoBehaviour
             }
             else
             {
+                _t3On= false;
                 Fail();
             }
         }
         if (_torch4.activeInHierarchy == true)
         {
-            if (_t1On && _t3On)
+            if (_t1On && _t3On && _puzzleComplete == false)
             {
                 _t4On = true;
+                _puzzleComplete = true;
             }
             else
             {
@@ -53,6 +60,14 @@ public class CombinationLock : MonoBehaviour
         {
             _door.SetActive(false);
             _myAudioSource.PlayOneShot(_doorOpen);
+            _t4On = false;
+        }
+        if (_puzzleComplete)
+        {
+            _torch1.SetActive(true);
+            _torch2.SetActive(true);
+            _torch3.SetActive(true);
+            _torch4.SetActive(true);
         }
         
     }

@@ -3,7 +3,7 @@ using UnityEngine;
 public class Sigil : Interactable
 {
     public InventoryItem sigilItem; // Reference to the ScriptableObject for the item
-
+    [SerializeField] private GameObject _interactIcon;
     public override void InteractWith(PlayerController player)
     {
         base.InteractWith(player);
@@ -18,6 +18,21 @@ public class Sigil : Interactable
         else
         {
             Debug.Log("Failed to add item to inventory.");
+        }
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
+            _interactIcon.SetActive(true);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
+            _interactIcon.SetActive(false);
         }
     }
 }

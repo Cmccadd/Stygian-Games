@@ -2,137 +2,135 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class EnemyAIPriest : MonoBehaviour
+public class EnemyAIPreist : MonoBehaviour
 {
     [Header("General Settings")]
     [SerializeField] private NavMeshAgent agent;
     [SerializeField] private Transform player;
-    [SerializeField] private LayerMask whatIsPlayer;
+    [SerializeField] private LayerMask whatIsGround, whatIsPlayer;
     private PlayerController playerController;
 
-    [Header("Idle/Look Around Settings")]
-    public float lookAroundTime = 5f; // Time to look around when idle
-    private bool isLookingAround = true;
-
-    [Header("Patrol Settings")]
-    public Transform[] patrolPoints;
+    [Header("Patrolling Settings")]
+    public Transform[] patrolPoints;  // Points for patrolling when the player is lost
     private int patrolIndex;
     private bool walkPointSet;
+    public float patrolWaitTime = 2f;
+    private bool isWaiting;
 
     [Header("Speed Settings")]
-    public float idleLookSpeed = 1f;  // Speed of rotation during idle looking around
-    public float chaseSpeed = 6f;     // Speed while chasing the player
-    public float patrolSpeed = 3.5f;  // Speed during patrolling
+    public float patrolSpeed = 3.5f;
+    public float chaseSpeed = 6f;
+
+    [Header("Chasing Settings")]
+    public float chaseTime = 5f;
+    private float chaseTimer;
 
     [Header("Detection Settings")]
-    public float sightRange = 10f;    // Detection range
-    public float fieldOfViewAngle = 90f;  // Field of view for the priest (vision cone)
-    private bool playerInSightRange;
+    public float sightRange;
+    public bool playerInSightRange;
 
-    [Header("Lost Player Settings")]
-    public float timeToLosePlayer = 5f; // Time after which the priest loses interest if it can't find the player
-    private float timeSinceLastSeenPlayer;
-    private bool isWaiting;
-    private float patrolWaitTime;
+    [Header("Raycast Detection Settings")]
+    public float raycastDistance = 10f;
+    public float raycastHeightOffset = 1.5f;
+    private bool playerInRaycast;
+
+
+    [Header("Look Around Settings")]
+    public float standStillLookAroundTime = 3f;  // How long the priest looks around while standing
+    private bool isStandingStill;
+
+    private bool isExcised = false;  // Prevent multiple excision calls
 
     private void Start()
     {
-        agent = GetComponent<NavMeshAgent>();
         player = GameObject.FindWithTag("Player").transform;
         playerController = player.GetComponent<PlayerController>();
 
-        patrolIndex = 0;
-        walkPointSet = false;
-        agent.speed = patrolSpeed;
-
-        // Start the priest in the looking around state
-        StartCoroutine(LookAround());
+        InitializeEnemy();
     }
 
     private void Update()
     {
-        // Check if player is within sight range
-        playerInSightRange = IsPlayerInSightRange();
+        if (playerController.isHidden)
+        {
+            StandStillAndLookAround();
+            return;  // If the player is hidden, stay in place
+        }
 
-        // If player is seen, start chasing
-        if (playerInSightRange)
-        {
-            ChasePlayer();
-        }
-        // If the player is lost for a certain amount of time, go back to patrolling
-        else if (timeSinceLastSeenPlayer >= timeToLosePlayer)
-        {
-            Patroling();
-        }
-        else
-        {
-            // Increment the timer for losing the player
-            timeSinceLastSeenPlayer += Time.deltaTime;
-        }
+        // Check if the player is in sight range and not hidden
+        playerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer) && !playerController.isHidden;
+
+        // Perform raycast to check for player and ensure player is not hidden
+        playerInRaycast = CheckRaycastForPlayer();
+
+        // Update state based on whether the player is detected
+        UpdateState();
     }
 
-    // Coroutine to handle idle looking around
-    private IEnumerator LookAround()
+    private void InitializeEnemy()
     {
-        while (isLookingAround)
-        {
-            // Rotate to simulate looking around
-            transform.Rotate(0, idleLookSpeed * Time.deltaTime, 0);
-            yield return null;
+        agent = GetComponent<NavMeshAgent>();
+        patrolIndex = 0;
+        walkPointSet = true;
+        chaseTimer = chaseTime;
+        agent.speed = patrolSpeed;
+        isStandingStill = true;  // Start by standing still
 
-            // Exit idle if player is detected
-            if (playerInSightRange)
+        if (player == null)
+        {
+            GameObject playerObject = GameObject.FindWithTag("Player");
+            if (playerObject != null)
             {
-                isLookingAround = false;
+                player = playerObject.transform;
             }
         }
     }
 
-    // Check if the player is within the field of view and in sight range
-    private bool IsPlayerInSightRange()
+    private void UpdateState()
     {
-        Vector3 directionToPlayer = (player.position - transform.position).normalized;
-        float angleBetweenPriestAndPlayer = Vector3.Angle(transform.forward, directionToPlayer);
-
-        // Check if within sight range and field of view angle
-        if (angleBetweenPriestAndPlayer < fieldOfViewAngle / 2 && Vector3.Distance(transform.position, player.position) < sightRange)
+        if ((playerInSightRange || playerInRaycast) && !playerController.isHidden)
         {
-            // Check if there are no obstacles blocking the view
-            if (Physics.Raycast(transform.position, directionToPlayer, out RaycastHit hit, sightRange, whatIsPlayer))
+            ChasePlayer();  // If the player is in sight, chase them
+        }
+        else if (!isStandingStill)
+        {
+            Patroling();  // If the player is lost, patrol between points
+        }
+    }
+
+    private bool CheckRaycastForPlayer()
+    {
+        Vector3 rayOrigin = transform.position + new Vector3(0, raycastHeightOffset, 0);
+        Vector3 rayDirection = transform.forward;
+
+        if (Physics.Raycast(rayOrigin, rayDirection, out RaycastHit hit, raycastDistance, whatIsPlayer))
+        {
+            if (hit.transform.CompareTag("Player"))
             {
-                if (hit.transform.CompareTag("Player"))
+                PlayerController playerController = hit.transform.GetComponent<PlayerController>();
+                if (playerController != null && !playerController.isHidden)
                 {
-                    timeSinceLastSeenPlayer = 0f; // Reset player lost timer
-                    Debug.DrawRay(transform.position, directionToPlayer * sightRange, Color.green);
+                    Debug.DrawRay(rayOrigin, rayDirection * raycastDistance, Color.green);
                     return true;
                 }
             }
         }
 
-        Debug.DrawRay(transform.position, directionToPlayer * sightRange, Color.red);
+        Debug.DrawRay(rayOrigin, rayDirection * raycastDistance, Color.red);
         return false;
     }
 
-    // Chase the player when detected
-    private void ChasePlayer()
-    {
-        agent.isStopped = false;
-        agent.speed = chaseSpeed;
-        agent.SetDestination(player.position);
-        Debug.Log("Chasing player...");
-    }
-
-    // Patrol between set points
     private void Patroling()
     {
+        agent.isStopped = false;
         agent.speed = patrolSpeed;
 
-        if (!walkPointSet)
+        if (!walkPointSet && patrolPoints.Length > 0 && !isWaiting)
         {
             SetNextPatrolPoint();
         }
 
-        if (walkPointSet && agent.remainingDistance < 1f)
+        if (walkPointSet && agent.remainingDistance < 1f && !isWaiting)
         {
             walkPointSet = false;
             StartCoroutine(LookAroundAtPatrolPoint());
@@ -141,15 +139,49 @@ public class EnemyAIPriest : MonoBehaviour
 
     private void SetNextPatrolPoint()
     {
-        if (patrolPoints.Length > 0)
+        agent.SetDestination(patrolPoints[patrolIndex].position);
+        walkPointSet = true;
+        patrolIndex = (patrolIndex + 1) % patrolPoints.Length;
+    }
+
+    private void ChasePlayer()
+    {
+        isStandingStill = false;
+        if (player != null)
         {
-            agent.SetDestination(patrolPoints[patrolIndex].position);
-            walkPointSet = true;
-            patrolIndex = (patrolIndex + 1) % patrolPoints.Length;
+            agent.isStopped = false;
+            agent.speed = chaseSpeed;
+            agent.SetDestination(player.position);
+            Debug.Log("Chasing player...");
         }
     }
 
-    // Coroutine to simulate looking around at patrol points
+    private void StandStillAndLookAround()
+    {
+        if (!isStandingStill)
+        {
+            isStandingStill = true;
+            StartCoroutine(LookAroundWhileStanding());
+        }
+    }
+
+    private IEnumerator LookAroundWhileStanding()
+    {
+        agent.isStopped = true;
+        float elapsedTime = 0f;
+
+        while (elapsedTime < standStillLookAroundTime)
+        {
+            // Rotate in place to simulate looking around
+            transform.Rotate(0, 120 * Time.deltaTime, 0);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        agent.isStopped = false;
+        isStandingStill = false;  // After looking around, go back to normal behavior
+    }
+
     private IEnumerator LookAroundAtPatrolPoint()
     {
         isWaiting = true;
@@ -158,7 +190,8 @@ public class EnemyAIPriest : MonoBehaviour
         float lookTime = patrolWaitTime;
         while (lookTime > 0f)
         {
-            transform.Rotate(0, idleLookSpeed * Time.deltaTime, 0);
+            // Rotate to simulate looking around
+            transform.Rotate(0, 120 * Time.deltaTime, 0);
             lookTime -= Time.deltaTime;
             yield return null;
         }
@@ -168,18 +201,27 @@ public class EnemyAIPriest : MonoBehaviour
         walkPointSet = false;
     }
 
+    // Ensures excision only happens once per enemy
+    public void Excise()
+    {
+        if (isExcised) return;  // Prevent multiple excise calls
+
+        Debug.Log("Enemy excised!");
+        isExcised = true;
+
+        // Delayed destroy to allow key drop to occur properly
+        Destroy(gameObject, 0.1f);  // Slight delay to ensure key dropping works
+    }
+
+
     private void OnDrawGizmosSelected()
     {
-        // Draw the sight range and field of view for debugging
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, sightRange);
 
-        Vector3 forward = transform.forward * sightRange;
-        Vector3 leftBoundary = Quaternion.Euler(0, -fieldOfViewAngle / 2, 0) * forward;
-        Vector3 rightBoundary = Quaternion.Euler(0, fieldOfViewAngle / 2, 0) * forward;
-
+        Vector3 rayOrigin = transform.position + new Vector3(0, raycastHeightOffset, 0);
+        Vector3 rayDirection = transform.forward;
         Gizmos.color = Color.blue;
-        Gizmos.DrawRay(transform.position, leftBoundary);
-        Gizmos.DrawRay(transform.position, rightBoundary);
+        Gizmos.DrawRay(rayOrigin, rayDirection * raycastDistance);
     }
 }

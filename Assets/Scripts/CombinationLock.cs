@@ -17,6 +17,7 @@ public class CombinationLock : MonoBehaviour
     [SerializeField] private AudioClip _doorOpen;
     [SerializeField] private AudioSource _myAudioSource;
 
+
     // Update is called once per frame
     void Update()
     {
@@ -68,8 +69,17 @@ public class CombinationLock : MonoBehaviour
             _torch2.SetActive(true);
             _torch3.SetActive(true);
             _torch4.SetActive(true);
+
+            // Hide the UI for the key
+            GameManager gameManager = FindObjectOfType<GameManager>();
+            if (gameManager != null)
+            {
+                gameManager.HideItemUI("Flint");  // Hide Key UI when it's used
+            }
+
+
         }
-        
+
     }
     
     private void Fail()

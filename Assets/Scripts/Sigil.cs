@@ -5,7 +5,6 @@ public class Sigil : Interactable
     public InventoryItem sigilItem; // Reference to the ScriptableObject for the item
     public GameObject itemPickupUI;  // Reference to the UI GameObject
     [SerializeField] private GameObject _interactIcon;
-
     public override void InteractWith(PlayerController player)
     {
         base.InteractWith(player);
@@ -13,6 +12,7 @@ public class Sigil : Interactable
         // Check if the player's inventory can accept the item
         if (player.inventory.AddItem(sigilItem))
         {
+            itemPickupUI.SetActive(true);
             GameManager gameManager = FindObjectOfType<GameManager>();
             if (gameManager != null)
             {

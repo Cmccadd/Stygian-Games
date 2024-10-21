@@ -13,6 +13,7 @@ public class KeyItem : Interactable
         // Add the key to the player's inventory
         if (player.inventory.AddItem(keyItem))
         {
+            itemPickupUI.SetActive(true);
             // Show the UI element when the item is picked up
             GameManager gameManager = FindObjectOfType<GameManager>();
             if (gameManager != null)

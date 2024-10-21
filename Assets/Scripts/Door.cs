@@ -5,6 +5,10 @@ public class Door : Interactable
     public string requiredKeyName; // The name of the key item required to unlock the door
     public bool isUnlocked = false; // Whether the door is unlocked
     public Animator doorAnimator; // Optional: Animator for door open/close animation
+    [SerializeField] private GameObject _interactIcon;
+    [SerializeField] private bool _imageOn; // Track if the image is on
+    [SerializeField] private AudioClip _doorOpen;
+    [SerializeField] private AudioSource _myAudioSource;
 
     public override void InteractWith(PlayerController player)
     {
@@ -32,12 +36,14 @@ public class Door : Interactable
         }
         else
         {
+
             Debug.Log("Door is locked. You need the key.");
         }
     }
 
     private void UnlockDoor()
     {
+        _myAudioSource.PlayOneShot(_doorOpen);
         isUnlocked = true;
         Debug.Log("Door unlocked!");
         OpenDoor();
@@ -53,6 +59,22 @@ public class Door : Interactable
         {
             // If no animation, you can move or disable the door object to simulate it opening
             gameObject.SetActive(false);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
+            _interactIcon.SetActive(true);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
+            _interactIcon.SetActive(false);
         }
     }
 }

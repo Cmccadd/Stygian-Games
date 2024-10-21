@@ -40,6 +40,14 @@ public class EnemyAI : MonoBehaviour
 
     private bool isExcised = false; // Prevent multiple excision calls
 
+    //[SerializeField] private GameObject _enemyWalk;
+    [SerializeField] private AudioClip _enemyDie;
+    [SerializeField] private AudioClip _enemyRoar;
+    [SerializeField] private AudioSource _myAudioSource;
+    private bool roared;
+    [SerializeField] private Animator _enemyNoticeAnimator;
+    [SerializeField] private GameObject _key;
+
     private void Start()
     {
         player = GameObject.FindWithTag("Player").transform;
@@ -90,10 +98,15 @@ public class EnemyAI : MonoBehaviour
         if ((playerInSightRange || playerInRaycast) && !playerController.isHidden)
         {
             ChasePlayer();
+            _enemyNoticeAnimator.SetBool("Noticed", true);
+            _enemyNoticeAnimator.SetBool("Unnoticed", false);
         }
         else
         {
             Patroling();
+            roared = false;
+            _enemyNoticeAnimator.SetBool("Noticed", false);
+            _enemyNoticeAnimator.SetBool("Unnoticed", true);
         }
     }
 
@@ -147,6 +160,12 @@ public class EnemyAI : MonoBehaviour
     {
         if (player != null)
         {
+            if (roared == false)
+            {
+                roared = true;
+                _myAudioSource.PlayOneShot(_enemyRoar);
+            }
+
             agent.isStopped = false;
             agent.speed = chaseSpeed;
             agent.SetDestination(player.position);
@@ -182,24 +201,27 @@ public class EnemyAI : MonoBehaviour
 
         // Drop the key when the enemy is excised
         DropKey();
-
+        _myAudioSource.PlayOneShot(_enemyDie);
         // Delayed destroy to allow key drop to occur properly
-        Destroy(gameObject, 0.1f);  // Slight delay to ensure key dropping works
+        chaseSpeed = 0;
+        patrolSpeed = 0;
+        Destroy(gameObject, 2f);  // Slight delay to ensure key dropping works
     }
 
     private void DropKey()
     {
         // Drop the key at the enemy's position (if no specific drop position is set, use enemy's transform)
-        if (keyPrefab != null)
-        {
-            Vector3 dropPos = (dropPosition != null) ? dropPosition.position : transform.position;  // Use dropPosition if set, otherwise enemy's position
-            Instantiate(keyPrefab, dropPos, Quaternion.identity);  // Drop the key at the calculated position
-            Debug.Log("Key dropped.");
-        }
-        else
-        {
-            Debug.LogWarning("Key prefab is not set.");
-        }
+        _key.SetActive(true);
+        //if (keyPrefab != null)
+        //{
+        //    Vector3 dropPos = (dropPosition != null) ? dropPosition.position : transform.position;  // Use dropPosition if set, otherwise enemy's position
+        //    Instantiate(keyPrefab, dropPos, Quaternion.identity);  // Drop the key at the calculated position
+        //    Debug.Log("Key dropped.");
+        //}
+        //else
+        //{
+        //    Debug.LogWarning("Key prefab is not set.");
+        //}
     }
 
     private void OnDrawGizmosSelected()

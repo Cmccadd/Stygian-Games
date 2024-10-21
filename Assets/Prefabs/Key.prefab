@@ -70,6 +70,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   keyItem: {fileID: 11400000, guid: 98ea54fb6431c774e84c4d84dbee4c6b, type: 2}
+  itemPickupUI: {fileID: 0}
+  _interactIcon: {fileID: 5952210388023139900}
 --- !u!212 &1094658015775358312
 SpriteRenderer:
   m_ObjectHideFlags: 0

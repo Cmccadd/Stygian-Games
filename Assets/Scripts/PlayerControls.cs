@@ -56,10 +56,10 @@ public class PlayerController : MonoBehaviour
         nearHideableObject = false;
         insideHideSpot = false;  // Default to false
 
-        if (inventory.HasItem(excursionItemName))
-        {
-            inventory.UseItem(excursionItemName);
-        }
+        //if (inventory.HasItem(excursionItemName))
+        //{
+        //    inventory.UseItem(excursionItemName);
+        //}
     }
 
     private void Start()
@@ -266,10 +266,10 @@ public class PlayerController : MonoBehaviour
                 if (enemyCollider != null)
                 {
                     EnemyAI enemy = enemyCollider.GetComponent<EnemyAI>();
-                    EnemyAIPreist preist = enemyCollider.GetComponent<EnemyAIPreist>();
-                    if (preist != null) // Ensure the enemy is not destroyed
+                    //EnemyAIPreist preist = enemyCollider.GetComponent<EnemyAIPreist>();
+                    if (enemy != null) // Ensure the enemy is not destroyed
                     {
-                        preist.Excise();
+                        enemy.Excise();
                         enemyInRange = true; // Mark that an enemy was in range
                     }
                 }

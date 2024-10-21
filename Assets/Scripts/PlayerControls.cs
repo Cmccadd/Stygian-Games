@@ -40,6 +40,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject _walkingSFX;
     [SerializeField] private AudioClip _jumpingSFX;
     [SerializeField] private AudioClip _grabSFX;
+    [SerializeField] private AudioClip _deathSFX;
     [SerializeField] private AudioSource _myAudioSource;
 
     private void Awake()
@@ -336,6 +337,7 @@ public class PlayerController : MonoBehaviour
 
     public void Dead()
     {
+        _myAudioSource.PlayOneShot(_deathSFX);
         dying = true;
     }
 }

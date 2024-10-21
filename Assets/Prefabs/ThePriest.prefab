@@ -64,6 +64,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: ThePriest
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: d712912b0f52b804391d1dd69a53bec7, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: d712912b0f52b804391d1dd69a53bec7, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -172,14 +180,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   agent: {fileID: 0}
   player: {fileID: 0}
+  whatIsGround:
+    serializedVersion: 2
+    m_Bits: 0
   whatIsPlayer:
     serializedVersion: 2
     m_Bits: 128
-  lookAroundTime: 5
   patrolPoints: []
-  idleLookSpeed: 1
-  chaseSpeed: 6
+  patrolWaitTime: 2
   patrolSpeed: 3.5
+  chaseSpeed: 6
+  chaseTime: 5
   sightRange: 2.84
-  fieldOfViewAngle: 90
-  timeToLosePlayer: 5
+  playerInSightRange: 0
+  raycastDistance: 10
+  raycastHeightOffset: 1.5
+  standStillLookAroundTime: 3

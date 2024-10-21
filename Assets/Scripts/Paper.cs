@@ -2,58 +2,45 @@ using UnityEngine;
 
 public class Paper : Interactable
 {
-    //public InventoryItem paperItem; // Reference to the ScriptableObject for the item
-    [SerializeField] private bool _imageOn;
-    [SerializeField] private GameObject _image;
-    [SerializeField] private GameObject _interactIcon;
+    [SerializeField] private bool _imageOn; // Track if the image is on
+    [SerializeField] private GameObject _image; // Reference to the image object (UI image)
+    [SerializeField] private InventoryItem paperItem; // Reference to the ScriptableObject for the item
+    private bool itemCollected = false; // Track if the item has already been collected
+    private bool itemDisplayed = false; // Track if the item image is displayed
 
     public override void InteractWith(PlayerController player)
     {
         base.InteractWith(player);
 
-        // Check if the player's inventory can accept the item
-        //if (player.inventory.AddItem(paperItem))
-        //{
-            //Debug.Log($"{paperItem.itemName} added to inventory.");
-            // Only destroy the game object after adding it to the inventory
-            if (_imageOn == false)
+        // If the item hasn't been displayed, display the image
+        if (!itemDisplayed)
+        {
+            _imageOn = true;
+            _image.SetActive(true);
+            itemDisplayed = true;  // Now the image is displayed
+        }
+        // If the item image is displayed, pressing interact again will add the item to inventory and hide the image
+        else if (itemDisplayed && !itemCollected)
+        {
+            // Try to add the item to the player's inventory
+            if (player.inventory.AddItem(paperItem))
             {
-                _imageOn = true;
-                _image.SetActive(true);
-            }
-            else if (_imageOn == true)
-            {
+                Debug.Log($"{paperItem.itemName} added to inventory.");
+
+                // Hide the image
                 _imageOn = false;
                 _image.SetActive(false);
+
+                // Mark the item as collected
+                itemCollected = true;
+
+                // Now that the item is collected, destroy the paper game object
+                Destroy(gameObject);
             }
-            //_imageOn = true;
-            //_image.SetActive(true);
-            //Destroy(gameObject);
-        //}
-        //else
-        //{
-          //  Debug.Log("Failed to add item to inventory.");
-        //}
-    }
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.tag == "Player")
-        {
-            _interactIcon.SetActive(true);
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.gameObject.tag == "Player")
-        {
-            _interactIcon.SetActive(false);
-        }
-
-        if (_imageOn == true)
-        {
-            _imageOn = false;
-            _image.SetActive(false);
+            else
+            {
+                Debug.Log("Failed to add item to inventory.");
+            }
         }
     }
 }

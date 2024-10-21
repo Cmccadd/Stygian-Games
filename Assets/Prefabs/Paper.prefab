@@ -4879,6 +4879,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _imageOn: 0
   _image: {fileID: 0}
+  paperItem: {fileID: 11400000, guid: f8b0cd21e0136494fbc8f81e69753177, type: 2}
 --- !u!135 &697474147510153883
 SphereCollider:
   m_ObjectHideFlags: 0

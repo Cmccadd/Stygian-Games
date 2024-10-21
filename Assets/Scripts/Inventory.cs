@@ -13,6 +13,14 @@ public class Inventory : MonoBehaviour
         {
             items.Add(item);
             Debug.Log($"{item.itemName} added to inventory.");
+
+            // Notify GameManager to show the UI for the added item
+            GameManager gameManager = FindObjectOfType<GameManager>();
+            if (gameManager != null)
+            {
+                gameManager.ShowItemUI(item.itemName); // Show the specific item UI
+            }
+
             return true;
         }
         else
@@ -53,6 +61,13 @@ public class Inventory : MonoBehaviour
         {
             items.Remove(itemToUse);
             Debug.Log($"{itemName} used and removed from inventory.");
+
+            // Notify GameManager to turn off the UI for the used item
+            GameManager gameManager = FindObjectOfType<GameManager>();
+            if (gameManager != null)
+            {
+                gameManager.HideItemUI(itemName); // Hide the specific item UI when the item is used
+            }
         }
         else
         {

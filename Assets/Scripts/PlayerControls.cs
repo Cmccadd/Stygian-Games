@@ -55,6 +55,11 @@ public class PlayerController : MonoBehaviour
         isHidden = false;
         nearHideableObject = false;
         insideHideSpot = false;  // Default to false
+
+        if (inventory.HasItem(excursionItemName))
+        {
+            inventory.UseItem(excursionItemName);
+        }
     }
 
     private void Start()

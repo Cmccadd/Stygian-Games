@@ -28,6 +28,7 @@ public class GameManager : MonoBehaviour
         restart.performed += Restart_performed;
 
         // Initially hide the special item UI panels
+
         Sigil?.SetActive(false);
         Key?.SetActive(false);
         Flint?.SetActive(false);

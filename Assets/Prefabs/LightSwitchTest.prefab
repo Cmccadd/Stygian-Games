@@ -4927,8 +4927,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lightOn: {fileID: 2970960786090720949}
   lightOff: {fileID: 946680971037758607}
-  switchOn: {fileID: 8071453974617563665}
-  switchOff: {fileID: 594054235831478059}
   toggle: 1
   _leverpull: {fileID: 0}
   _leverAnimator: {fileID: 0}
@@ -5501,8 +5499,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lightOn: {fileID: 2970960786090720949}
   lightOff: {fileID: 946680971037758607}
-  switchOn: {fileID: 8071453974617563665}
-  switchOff: {fileID: 594054235831478059}
   toggle: 0
   _leverpull: {fileID: 8300000, guid: 2fbd3c18899e5bc4fbf112c0cff5b0d0, type: 3}
   _leverAnimator: {fileID: 6118100302074944816}

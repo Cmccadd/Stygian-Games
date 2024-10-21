@@ -4,15 +4,13 @@ using UnityEngine.SceneManagement;
 public class MenuControls : MonoBehaviour
 {
     [SerializeField] private GameObject Cutscene;
-    [SerializeField] private float _cutsceneTimer;
 
     /// <summary>
     /// Loads the next scene in the build index.
     /// </summary>
-    public void NextScene()
+    public void StartCutscene()
     {
         Cutscene.SetActive(true);
-        Invoke("LoadScene", _cutsceneTimer);
     }
 
     /// <summary>
@@ -21,6 +19,11 @@ public class MenuControls : MonoBehaviour
     private void LoadScene()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+    }
+
+    public void Reset()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     /// <summary>

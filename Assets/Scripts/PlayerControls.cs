@@ -14,9 +14,11 @@ public class PlayerController : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Collider playerCollider;
     public bool isHidden;
+    public bool dying;
     private bool nearHideableObject;
     private bool insideHideSpot;  // Track if inside hideable object
     private GameObject[] enemies;
+    [SerializeField] private GameObject _hideIndicator;
     private Interactable currentInteractable;
 
     private bool facingLeft = false;  // To track the last direction faced
@@ -34,9 +36,11 @@ public class PlayerController : MonoBehaviour
     private Collider[] enemiesInRange;
 
     [SerializeField] private Animator _animator;
+    [SerializeField] private Animator _enemyNoticeAnimator;
     [SerializeField] private GameObject _walkingSFX;
     [SerializeField] private AudioClip _jumpingSFX;
     [SerializeField] private AudioClip _grabSFX;
+    [SerializeField] private AudioClip _deathSFX;
     [SerializeField] private AudioSource _myAudioSource;
 
     private void Awake()
@@ -60,7 +64,7 @@ public class PlayerController : MonoBehaviour
 
     public void OnMove(InputValue value)
     {
-        if (!isHidden)
+        if (!isHidden && !dying)
         {
             inputDirection = value.Get<Vector2>();
             _walkingSFX.SetActive(true);
@@ -69,7 +73,7 @@ public class PlayerController : MonoBehaviour
 
     public void OnJump(InputValue value)
     {
-        if (!isHidden && value.isPressed && isGrounded())
+        if (!isHidden && value.isPressed && isGrounded() && dying == false)
         {
             Jump();
             _myAudioSource.PlayOneShot(_jumpingSFX);
@@ -113,7 +117,7 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!isHidden)
+        if (!isHidden || dying == false)
         {
             MovePlayer();
             HandleSpriteFlip();  // Handle sprite flipping based on movement direction
@@ -139,6 +143,10 @@ public class PlayerController : MonoBehaviour
             _animator.SetBool("Moving", false);
             _walkingSFX.SetActive(false);
         }
+        else if (rb.velocity.x != 0 && rb.velocity.y == 0 || rb.velocity.z != 0 && rb.velocity.y == 0)
+        {
+            _walkingSFX.SetActive(true);
+        }
 
         if (rb.velocity.z > 0f)
         {
@@ -162,10 +170,13 @@ public class PlayerController : MonoBehaviour
 
     private void MovePlayer()
     {
-        Vector3 movement = new Vector3(inputDirection.x, 0, inputDirection.y).normalized * moveSpeed;
-        movement.y = rb.velocity.y;
-        rb.velocity = movement;
-        _animator.SetBool("Moving", true);
+        if (dying == false)
+        { 
+           Vector3 movement = new Vector3(inputDirection.x, 0, inputDirection.y).normalized * moveSpeed;
+            movement.y = rb.velocity.y;
+            rb.velocity = movement;
+            _animator.SetBool("Moving", true);
+        }
     }
 
     private void Jump()
@@ -185,7 +196,9 @@ public class PlayerController : MonoBehaviour
         if (isHidden)
         {
             rb.velocity = Vector3.zero;
-            spriteRenderer.enabled = false;
+            _animator.SetBool("Hiding", true);
+            _enemyNoticeAnimator.SetBool("Hidden", true);
+            //spriteRenderer.enabled = false;
 
             foreach (GameObject enemy in enemies)
             {
@@ -199,7 +212,9 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            spriteRenderer.enabled = true;
+            _animator.SetBool("Hiding", false);
+            _enemyNoticeAnimator.SetBool("Hidden", false);
+            //spriteRenderer.enabled = true;
 
             foreach (GameObject enemy in enemies)
             {
@@ -246,9 +261,10 @@ public class PlayerController : MonoBehaviour
                 if (enemyCollider != null)
                 {
                     EnemyAI enemy = enemyCollider.GetComponent<EnemyAI>();
-                    if (enemy != null) // Ensure the enemy is not destroyed
+                    EnemyAIPreist preist = enemyCollider.GetComponent<EnemyAIPreist>();
+                    if (preist != null) // Ensure the enemy is not destroyed
                     {
-                        enemy.Excise();
+                        preist.Excise();
                         enemyInRange = true; // Mark that an enemy was in range
                     }
                 }
@@ -292,6 +308,7 @@ public class PlayerController : MonoBehaviour
         if (other.CompareTag("Hideable"))
         {
             insideHideSpot = false; // Reset when leaving hideable area
+            _hideIndicator.SetActive(false);
         }
     }
 
@@ -300,6 +317,11 @@ public class PlayerController : MonoBehaviour
         if (other.CompareTag("Hideable"))
         {
             nearHideableObject = true;
+            _hideIndicator.SetActive(true);
+        }
+        if (other.CompareTag("Cutscene"))
+        {
+            dying = true;
         }
     }
 
@@ -311,5 +333,11 @@ public class PlayerController : MonoBehaviour
             Gizmos.color = Color.green;
             Gizmos.DrawWireSphere(transform.position, exorcismRange);
         }
+    }
+
+    public void Dead()
+    {
+        _myAudioSource.PlayOneShot(_deathSFX);
+        dying = true;
     }
 }

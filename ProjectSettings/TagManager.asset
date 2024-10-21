@@ -8,6 +8,7 @@ TagManager:
   - Environment
   - Hideable
   - Crush
+  - Cutscene
   layers:
   - Default
   - TransparentFX

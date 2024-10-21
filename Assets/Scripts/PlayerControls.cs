@@ -250,9 +250,10 @@ public class PlayerController : MonoBehaviour
                 if (enemyCollider != null)
                 {
                     EnemyAI enemy = enemyCollider.GetComponent<EnemyAI>();
-                    if (enemy != null) // Ensure the enemy is not destroyed
+                    EnemyAIPreist preist = enemyCollider.GetComponent<EnemyAIPreist>();
+                    if (preist != null) // Ensure the enemy is not destroyed
                     {
-                        enemy.Excise();
+                        preist.Excise();
                         enemyInRange = true; // Mark that an enemy was in range
                     }
                 }

@@ -17,7 +17,18 @@ public class Door : Interactable
         }
         else if (player.inventory.HasItem(requiredKeyName))
         {
+            // Unlock the door
             UnlockDoor();
+
+            // Remove the key from the inventory
+            player.inventory.UseItem(requiredKeyName);
+
+            // Hide the UI for the key
+            GameManager gameManager = FindObjectOfType<GameManager>();
+            if (gameManager != null)
+            {
+                gameManager.HideItemUI("Key");  // Hide Key UI when it's used
+            }
         }
         else
         {

@@ -47,6 +47,8 @@ public class EnemyAI : MonoBehaviour
     private bool roared;
     [SerializeField] private Animator _enemyNoticeAnimator;
     [SerializeField] private GameObject _key;
+    [SerializeField] private GameObject _deathAnim;
+    [SerializeField] private GameObject _enemyNoticeObject;
 
     private void Start()
     {
@@ -198,14 +200,25 @@ public class EnemyAI : MonoBehaviour
 
         Debug.Log("Enemy excised!");
         isExcised = true;
-
+        _enemyNoticeObject.SetActive(false);
+        _deathAnim.SetActive(true);
         // Drop the key when the enemy is excised
         DropKey();
-        _myAudioSource.PlayOneShot(_enemyDie);
+        //_myAudioSource.PlayOneShot(_enemyDie);
         // Delayed destroy to allow key drop to occur properly
         chaseSpeed = 0;
         patrolSpeed = 0;
-        Destroy(gameObject, 2f);  // Slight delay to ensure key dropping works
+        //Destroy(gameObject, 2f);  // Slight delay to ensure key dropping works
+    }
+
+    public void DeathSound()
+    {
+        _myAudioSource.PlayOneShot(_enemyDie);
+    }
+
+    public void Die()
+    {
+        Destroy(gameObject);
     }
 
     private void DropKey()

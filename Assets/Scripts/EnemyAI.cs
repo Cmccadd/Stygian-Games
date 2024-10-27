@@ -7,7 +7,7 @@ public class EnemyAI : MonoBehaviour
     [Header("General Settings")]
     [SerializeField] private NavMeshAgent agent;
     [SerializeField] private Transform player;
-    [SerializeField] private LayerMask whatIsGround, whatIsPlayer;
+    [SerializeField] private LayerMask whatIsGround, whatIsPlayer, obstacleMask;
     private PlayerController playerController;
 
     [Header("Patrolling Settings")]
@@ -26,21 +26,24 @@ public class EnemyAI : MonoBehaviour
     private float chaseTimer;
 
     [Header("Detection Settings")]
-    public float sightRange;
+    public float sightRange = 30f; // Adjust this value to cover the whole main room
+    public float coneAngle = 60f; // Angle of the vision cone
+    public int coneResolution = 20; // Number of rays to cast in the cone
     public bool playerInSightRange;
 
     [Header("Raycast Detection Settings")]
-    public float raycastDistance = 10f;
+    public float raycastDistance = 50f; // Make this long enough to reach across the entire room
     public float raycastHeightOffset = 1.5f;
     private bool playerInRaycast;
 
     [Header("Key Drop Settings")]
-    public GameObject keyPrefab;  // Reference to the key prefab
-    public Transform dropPosition;  // Optional: Position where the key should drop
+    public GameObject keyPrefab;
+    public Transform dropPosition;
 
-    private bool isExcised = false; // Prevent multiple excision calls
+    [Header("Hitbox Settings")]
+    [SerializeField] private Collider enemyHitbox; // Reference to the enemy's hitbox (collider)
 
-    //[SerializeField] private GameObject _enemyWalk;
+    private bool isExcised = false;
     [SerializeField] private AudioClip _enemyDie;
     [SerializeField] private AudioClip _enemyRoar;
     [SerializeField] private AudioSource _myAudioSource;
@@ -64,14 +67,14 @@ public class EnemyAI : MonoBehaviour
         if (playerController.isHidden)
         {
             Patroling();
-            return; // Exit detection logic if the player is hidden
+            return;
         }
 
         // Check if the player is in sight range and not hidden
         playerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer) && !playerController.isHidden;
 
-        // Perform raycast to check for player and ensure player is not hidden
-        playerInRaycast = CheckRaycastForPlayer();
+        // Perform raycast cone check to see if the player is visible within the cone of vision
+        playerInRaycast = CheckConeForPlayer();
 
         // Update state based on whether the player is detected
         UpdateState();
@@ -112,25 +115,35 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    private bool CheckRaycastForPlayer()
+    private bool CheckConeForPlayer()
     {
         Vector3 rayOrigin = transform.position + new Vector3(0, raycastHeightOffset, 0);
-        Vector3 rayDirection = transform.forward;
+        Vector3 forwardDirection = transform.forward;
 
-        if (Physics.Raycast(rayOrigin, rayDirection, out RaycastHit hit, raycastDistance, whatIsPlayer))
+        // Iterate through the cone using the coneResolution to cast multiple rays
+        for (int i = 0; i <= coneResolution; i++)
         {
-            if (hit.transform.CompareTag("Player"))
+            // Calculate the angle for this ray based on the cone
+            float angle = -coneAngle / 2 + (coneAngle / coneResolution) * i;
+            Quaternion rotation = Quaternion.Euler(0, angle, 0);
+            Vector3 rayDirection = rotation * forwardDirection;
+
+            if (Physics.Raycast(rayOrigin, rayDirection, out RaycastHit hit, raycastDistance, whatIsPlayer | obstacleMask))
             {
-                PlayerController playerController = hit.transform.GetComponent<PlayerController>();
-                if (playerController != null && !playerController.isHidden)
+                if (hit.transform.CompareTag("Player"))
                 {
-                    Debug.DrawRay(rayOrigin, rayDirection * raycastDistance, Color.green);
-                    return true;
+                    PlayerController playerController = hit.transform.GetComponent<PlayerController>();
+                    if (playerController != null && !playerController.isHidden)
+                    {
+                        Debug.DrawRay(rayOrigin, rayDirection * raycastDistance, Color.green);
+                        return true;
+                    }
                 }
             }
+
+            Debug.DrawRay(rayOrigin, rayDirection * raycastDistance, Color.red);
         }
 
-        Debug.DrawRay(rayOrigin, rayDirection * raycastDistance, Color.red);
         return false;
     }
 
@@ -162,7 +175,7 @@ public class EnemyAI : MonoBehaviour
     {
         if (player != null)
         {
-            if (roared == false)
+            if (!roared)
             {
                 roared = true;
                 _myAudioSource.PlayOneShot(_enemyRoar);
@@ -193,22 +206,24 @@ public class EnemyAI : MonoBehaviour
         walkPointSet = false;
     }
 
-    // Ensures excision only happens once per enemy
     public void Excise()
     {
-        if (isExcised) return; // Prevent multiple excise calls
+        if (isExcised) return;
 
         Debug.Log("Enemy excised!");
         isExcised = true;
         _enemyNoticeObject.SetActive(false);
         _deathAnim.SetActive(true);
-        // Drop the key when the enemy is excised
+
+        // Disable the hitbox to prevent damage to the player
+        if (enemyHitbox != null)
+        {
+            enemyHitbox.enabled = false;
+        }
+
         DropKey();
-        //_myAudioSource.PlayOneShot(_enemyDie);
-        // Delayed destroy to allow key drop to occur properly
         chaseSpeed = 0;
         patrolSpeed = 0;
-        //Destroy(gameObject, 2f);  // Slight delay to ensure key dropping works
     }
 
     public void DeathSound()
@@ -223,18 +238,7 @@ public class EnemyAI : MonoBehaviour
 
     private void DropKey()
     {
-        // Drop the key at the enemy's position (if no specific drop position is set, use enemy's transform)
         _key.SetActive(true);
-        //if (keyPrefab != null)
-        //{
-        //    Vector3 dropPos = (dropPosition != null) ? dropPosition.position : transform.position;  // Use dropPosition if set, otherwise enemy's position
-        //    Instantiate(keyPrefab, dropPos, Quaternion.identity);  // Drop the key at the calculated position
-        //    Debug.Log("Key dropped.");
-        //}
-        //else
-        //{
-        //    Debug.LogWarning("Key prefab is not set.");
-        //}
     }
 
     private void OnDrawGizmosSelected()
@@ -243,8 +247,16 @@ public class EnemyAI : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, sightRange);
 
         Vector3 rayOrigin = transform.position + new Vector3(0, raycastHeightOffset, 0);
-        Vector3 rayDirection = transform.forward;
-        Gizmos.color = Color.blue;
-        Gizmos.DrawRay(rayOrigin, rayDirection * raycastDistance);
+        Vector3 forwardDirection = transform.forward;
+
+        // Draw the cone for visual representation
+        for (int i = 0; i <= coneResolution; i++)
+        {
+            float angle = -coneAngle / 2 + (coneAngle / coneResolution) * i;
+            Quaternion rotation = Quaternion.Euler(0, angle, 0);
+            Vector3 rayDirection = rotation * forwardDirection;
+            Gizmos.color = Color.blue;
+            Gizmos.DrawRay(rayOrigin, rayDirection * raycastDistance);
+        }
     }
 }

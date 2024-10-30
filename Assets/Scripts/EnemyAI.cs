@@ -22,17 +22,17 @@ public class EnemyAI : MonoBehaviour
     public float chaseSpeed = 6f;
 
     [Header("Chasing Settings")]
-    public float chaseTime = 5f;
-    private float chaseTimer;
+    public float chaseDuration = 5f;  // Duration to keep chasing after losing sight
+    private float chaseTimer = 0f;    // Timer to track chase duration
 
     [Header("Detection Settings")]
-    public float sightRange = 30f; // Adjust this value to cover the whole main room
-    public float coneAngle = 60f; // Angle of the vision cone
-    public int coneResolution = 20; // Number of rays to cast in the cone
+    public float sightRange = 30f;
+    public float coneAngle = 60f;
+    public int coneResolution = 20;
     public bool playerInSightRange;
 
     [Header("Raycast Detection Settings")]
-    public float raycastDistance = 50f; // Make this long enough to reach across the entire room
+    public float raycastDistance = 50f;
     public float raycastHeightOffset = 1.5f;
     private bool playerInRaycast;
 
@@ -41,7 +41,7 @@ public class EnemyAI : MonoBehaviour
     public Transform dropPosition;
 
     [Header("Hitbox Settings")]
-    [SerializeField] private Collider enemyHitbox; // Reference to the enemy's hitbox (collider)
+    [SerializeField] private Collider enemyHitbox;
 
     private bool isExcised = false;
     [SerializeField] private AudioClip _enemyDie;
@@ -57,27 +57,34 @@ public class EnemyAI : MonoBehaviour
     {
         player = GameObject.FindWithTag("Player").transform;
         playerController = player.GetComponent<PlayerController>();
-
         InitializeEnemy();
     }
 
     private void Update()
     {
-        // Check if the player is hidden
+        // Reset the chase timer if the player hides
         if (playerController.isHidden)
         {
+            chaseTimer = 0f;
             Patroling();
             return;
         }
 
-        // Check if the player is in sight range and not hidden
         playerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer) && !playerController.isHidden;
-
-        // Perform raycast cone check to see if the player is visible within the cone of vision
         playerInRaycast = CheckConeForPlayer();
 
-        // Update state based on whether the player is detected
+        if (playerInSightRange || playerInRaycast)
+        {
+            chaseTimer = chaseDuration;
+            if (!roared)
+            {
+                roared = true;
+                _myAudioSource.PlayOneShot(_enemyRoar);
+            }
+        }
+
         UpdateState();
+        if (chaseTimer > 0) chaseTimer -= Time.deltaTime;
     }
 
     private void InitializeEnemy()
@@ -85,7 +92,6 @@ public class EnemyAI : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         patrolIndex = 0;
         walkPointSet = true;
-        chaseTimer = chaseTime;
         agent.speed = patrolSpeed;
 
         if (player == null)
@@ -100,7 +106,7 @@ public class EnemyAI : MonoBehaviour
 
     private void UpdateState()
     {
-        if ((playerInSightRange || playerInRaycast) && !playerController.isHidden)
+        if (chaseTimer > 0)
         {
             ChasePlayer();
             _enemyNoticeAnimator.SetBool("Noticed", true);
@@ -120,24 +126,18 @@ public class EnemyAI : MonoBehaviour
         Vector3 rayOrigin = transform.position + new Vector3(0, raycastHeightOffset, 0);
         Vector3 forwardDirection = transform.forward;
 
-        // Iterate through the cone using the coneResolution to cast multiple rays
         for (int i = 0; i <= coneResolution; i++)
         {
-            // Calculate the angle for this ray based on the cone
             float angle = -coneAngle / 2 + (coneAngle / coneResolution) * i;
             Quaternion rotation = Quaternion.Euler(0, angle, 0);
             Vector3 rayDirection = rotation * forwardDirection;
 
             if (Physics.Raycast(rayOrigin, rayDirection, out RaycastHit hit, raycastDistance, whatIsPlayer | obstacleMask))
             {
-                if (hit.transform.CompareTag("Player"))
+                if (hit.transform.CompareTag("Player") && !playerController.isHidden)
                 {
-                    PlayerController playerController = hit.transform.GetComponent<PlayerController>();
-                    if (playerController != null && !playerController.isHidden)
-                    {
-                        Debug.DrawRay(rayOrigin, rayDirection * raycastDistance, Color.green);
-                        return true;
-                    }
+                    Debug.DrawRay(rayOrigin, rayDirection * raycastDistance, Color.green);
+                    return true;
                 }
             }
 
@@ -173,19 +173,10 @@ public class EnemyAI : MonoBehaviour
 
     private void ChasePlayer()
     {
-        if (player != null)
-        {
-            if (!roared)
-            {
-                roared = true;
-                _myAudioSource.PlayOneShot(_enemyRoar);
-            }
-
-            agent.isStopped = false;
-            agent.speed = chaseSpeed;
-            agent.SetDestination(player.position);
-            Debug.Log("Chasing player...");
-        }
+        agent.isStopped = false;
+        agent.speed = chaseSpeed;
+        agent.SetDestination(player.position);
+        Debug.Log("Chasing player...");
     }
 
     private IEnumerator LookAroundAtPatrolPoint()
@@ -215,10 +206,9 @@ public class EnemyAI : MonoBehaviour
         _enemyNoticeObject.SetActive(false);
         _deathAnim.SetActive(true);
 
-        // Disable the hitbox to prevent damage to the player
         if (enemyHitbox != null)
         {
-            enemyHitbox.enabled = false;
+            enemyHitbox.enabled = false; // Disable hitbox to prevent harm
         }
 
         DropKey();
@@ -249,7 +239,6 @@ public class EnemyAI : MonoBehaviour
         Vector3 rayOrigin = transform.position + new Vector3(0, raycastHeightOffset, 0);
         Vector3 forwardDirection = transform.forward;
 
-        // Draw the cone for visual representation
         for (int i = 0; i <= coneResolution; i++)
         {
             float angle = -coneAngle / 2 + (coneAngle / coneResolution) * i;

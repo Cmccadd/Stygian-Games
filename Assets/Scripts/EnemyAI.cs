@@ -43,12 +43,14 @@ public class EnemyAI : MonoBehaviour
     [Header("Hitbox Settings")]
     [SerializeField] private Collider enemyHitbox;
 
-    private bool isExcised = false;
+    [Header("Animation and Audio")]
+    [SerializeField] private Animator enemyAnimator;  // Reference to the Animator
     [SerializeField] private AudioClip _enemyDie;
     [SerializeField] private AudioClip _enemyRoar;
     [SerializeField] private AudioSource _myAudioSource;
+
+    private bool isExcised = false;
     private bool roared;
-    [SerializeField] private Animator _enemyNoticeAnimator;
     [SerializeField] private GameObject _key;
     [SerializeField] private GameObject _deathAnim;
     [SerializeField] private GameObject _enemyNoticeObject;
@@ -62,7 +64,6 @@ public class EnemyAI : MonoBehaviour
 
     private void Update()
     {
-        // Reset the chase timer if the player hides
         if (playerController.isHidden)
         {
             chaseTimer = 0f;
@@ -109,15 +110,13 @@ public class EnemyAI : MonoBehaviour
         if (chaseTimer > 0)
         {
             ChasePlayer();
-            _enemyNoticeAnimator.SetBool("Noticed", true);
-            _enemyNoticeAnimator.SetBool("Unnoticed", false);
+            enemyAnimator.SetBool("Walking", true); // Start walking animation
+            enemyAnimator.SetBool("Idle", false); // Disable idle animation during chase
         }
         else
         {
             Patroling();
             roared = false;
-            _enemyNoticeAnimator.SetBool("Noticed", false);
-            _enemyNoticeAnimator.SetBool("Unnoticed", true);
         }
     }
 
@@ -155,6 +154,13 @@ public class EnemyAI : MonoBehaviour
         if (!walkPointSet && patrolPoints.Length > 0 && !isWaiting)
         {
             SetNextPatrolPoint();
+            enemyAnimator.SetBool("Walking", true); // Enable walking animation during patrol
+            enemyAnimator.SetBool("Idle", false); // Disable idle animation
+        }
+        else if (!isWaiting)
+        {
+            enemyAnimator.SetBool("Walking", false); // Stop walking
+            enemyAnimator.SetBool("Idle", true); // Enable idle animation
         }
 
         if (walkPointSet && agent.remainingDistance < 1f && !isWaiting)
@@ -183,6 +189,8 @@ public class EnemyAI : MonoBehaviour
     {
         isWaiting = true;
         agent.isStopped = true;
+        enemyAnimator.SetBool("Walking", false); // Stop walking animation
+        enemyAnimator.SetBool("Idle", true); // Enable idle animation during look-around
 
         float lookTime = patrolWaitTime;
         while (lookTime > 0f)
@@ -195,6 +203,14 @@ public class EnemyAI : MonoBehaviour
         agent.isStopped = false;
         isWaiting = false;
         walkPointSet = false;
+        enemyAnimator.SetBool("Idle", false); // Disable idle animation after look-around
+        enemyAnimator.SetBool("Walking", true); // Resume walking animation
+    }
+
+    private void AttackPlayer()
+    {
+        enemyAnimator.SetTrigger("Attack"); // Play attack animation
+        Debug.Log("Attacking player...");
     }
 
     public void Excise()
@@ -208,12 +224,14 @@ public class EnemyAI : MonoBehaviour
 
         if (enemyHitbox != null)
         {
-            enemyHitbox.enabled = false; // Disable hitbox to prevent harm
+            this.enemyHitbox.enabled = false;
         }
 
         DropKey();
         chaseSpeed = 0;
         patrolSpeed = 0;
+        enemyAnimator.SetBool("Walking", false); // Stop walking animation on excision
+        enemyAnimator.SetBool("Idle", true); // Switch to idle animation on excision
     }
 
     public void DeathSound()

@@ -20,10 +20,12 @@ public class EnemyAI : MonoBehaviour
     [Header("Speed Settings")]
     public float patrolSpeed = 3.5f;
     public float chaseSpeed = 6f;
+    public float maxVelocity = 5f;
+    public float acceleration = 5f;
 
     [Header("Chasing Settings")]
-    public float chaseDuration = 5f;  // Duration to keep chasing after losing sight
-    private float chaseTimer = 0f;    // Timer to track chase duration
+    public float chaseDuration = 5f;
+    private float chaseTimer = 0f;
 
     [Header("Detection Settings")]
     public float sightRange = 30f;
@@ -44,13 +46,15 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private Collider enemyHitbox;
 
     [Header("Animation and Audio")]
-    [SerializeField] private Animator enemyAnimator;  // Reference to the Animator
+    [SerializeField] private Animator enemyAnimator;
+    [SerializeField] private Animator _enemyNoticeAnimator;
     [SerializeField] private AudioClip _enemyDie;
     [SerializeField] private AudioClip _enemyRoar;
     [SerializeField] private AudioSource _myAudioSource;
 
     private bool isExcised = false;
     private bool roared;
+    private bool isAttacking = false;
     [SerializeField] private GameObject _key;
     [SerializeField] private GameObject _deathAnim;
     [SerializeField] private GameObject _enemyNoticeObject;
@@ -67,6 +71,7 @@ public class EnemyAI : MonoBehaviour
         if (playerController.isHidden)
         {
             chaseTimer = 0f;
+            _enemyNoticeAnimator.SetBool("Noticed", false);  // Set "Noticed" to false when player is hidden
             Patroling();
             return;
         }
@@ -77,23 +82,35 @@ public class EnemyAI : MonoBehaviour
         if (playerInSightRange || playerInRaycast)
         {
             chaseTimer = chaseDuration;
+            _enemyNoticeAnimator.SetBool("Noticed", true);  // Set "Noticed" to true when player is detected
             if (!roared)
             {
                 roared = true;
                 _myAudioSource.PlayOneShot(_enemyRoar);
             }
         }
+        else
+        {
+            _enemyNoticeAnimator.SetBool("Noticed", false);  // Set "Noticed" to false when player is not detected
+        }
 
-        UpdateState();
+
         if (chaseTimer > 0) chaseTimer -= Time.deltaTime;
+
+        LimitVelocity();
+
+        UpdateAnimationDirectionAndTurning();
     }
 
     private void InitializeEnemy()
     {
         agent = GetComponent<NavMeshAgent>();
+        agent.speed = patrolSpeed;
+        agent.acceleration = acceleration;
+        agent.stoppingDistance = 0.5f;
+
         patrolIndex = 0;
         walkPointSet = true;
-        agent.speed = patrolSpeed;
 
         if (player == null)
         {
@@ -110,8 +127,6 @@ public class EnemyAI : MonoBehaviour
         if (chaseTimer > 0)
         {
             ChasePlayer();
-            enemyAnimator.SetBool("Walking", true); // Start walking animation
-            enemyAnimator.SetBool("Idle", false); // Disable idle animation during chase
         }
         else
         {
@@ -154,16 +169,13 @@ public class EnemyAI : MonoBehaviour
         if (!walkPointSet && patrolPoints.Length > 0 && !isWaiting)
         {
             SetNextPatrolPoint();
-            enemyAnimator.SetBool("Walking", true); // Enable walking animation during patrol
-            enemyAnimator.SetBool("Idle", false); // Disable idle animation
         }
         else if (!isWaiting)
         {
-            enemyAnimator.SetBool("Walking", false); // Stop walking
-            enemyAnimator.SetBool("Idle", true); // Enable idle animation
+            ResetAllAnimations();
         }
 
-        if (walkPointSet && agent.remainingDistance < 1f && !isWaiting)
+        if (walkPointSet && agent.remainingDistance < agent.stoppingDistance && !isWaiting)
         {
             walkPointSet = false;
             StartCoroutine(LookAroundAtPatrolPoint());
@@ -182,15 +194,12 @@ public class EnemyAI : MonoBehaviour
         agent.isStopped = false;
         agent.speed = chaseSpeed;
         agent.SetDestination(player.position);
-        Debug.Log("Chasing player...");
     }
 
     private IEnumerator LookAroundAtPatrolPoint()
     {
         isWaiting = true;
         agent.isStopped = true;
-        enemyAnimator.SetBool("Walking", false); // Stop walking animation
-        enemyAnimator.SetBool("Idle", true); // Enable idle animation during look-around
 
         float lookTime = patrolWaitTime;
         while (lookTime > 0f)
@@ -203,35 +212,66 @@ public class EnemyAI : MonoBehaviour
         agent.isStopped = false;
         isWaiting = false;
         walkPointSet = false;
-        enemyAnimator.SetBool("Idle", false); // Disable idle animation after look-around
-        enemyAnimator.SetBool("Walking", true); // Resume walking animation
     }
 
-    private void AttackPlayer()
+    private void UpdateAnimationDirectionAndTurning()
     {
-        enemyAnimator.SetTrigger("Attack"); // Play attack animation
-        Debug.Log("Attacking player...");
+        Vector3 directionToPlayer = (player.position - transform.position).normalized;
+        float angle = Vector3.SignedAngle(transform.forward, directionToPlayer, Vector3.up);
+        float turnSpeed = Mathf.Abs(agent.angularSpeed);
+
+        ResetAllAnimations();
+
+        if (angle > -22.5f && angle <= 22.5f)
+            enemyAnimator.SetBool("Forward", true);
+        else if (angle > 22.5f && angle <= 67.5f)
+            enemyAnimator.SetBool("ForwardRight", true);
+        else if (angle > 67.5f && angle <= 112.5f)
+            enemyAnimator.SetBool("Right", true);
+        else if (angle > 112.5f && angle <= 157.5f)
+            enemyAnimator.SetBool("BackwardRight", true);
+        else if ((angle > 157.5f && angle <= 180f) || (angle <= -157.5f && angle >= -180f))
+            enemyAnimator.SetBool("Backward", true);
+        else if (angle > -157.5f && angle <= -112.5f)
+            enemyAnimator.SetBool("BackwardLeft", true);
+        else if (angle > -112.5f && angle <= -67.5f)
+            enemyAnimator.SetBool("Left", true);
+        else if (angle > -67.5f && angle <= -22.5f)
+            enemyAnimator.SetBool("ForwardLeft", true);
+
+        enemyAnimator.SetFloat("TurnSpeed", turnSpeed);
     }
+
+    private void ResetAllAnimations()
+    {
+        enemyAnimator.SetBool("Forward", false);
+        enemyAnimator.SetBool("ForwardRight", false);
+        enemyAnimator.SetBool("Right", false);
+        enemyAnimator.SetBool("BackwardRight", false);
+        enemyAnimator.SetBool("Backward", false);
+        enemyAnimator.SetBool("BackwardLeft", false);
+        enemyAnimator.SetBool("Left", false);
+        enemyAnimator.SetBool("ForwardLeft", false);
+    }
+
 
     public void Excise()
     {
         if (isExcised) return;
 
-        Debug.Log("Enemy excised!");
         isExcised = true;
         _enemyNoticeObject.SetActive(false);
         _deathAnim.SetActive(true);
 
         if (enemyHitbox != null)
         {
-            this.enemyHitbox.enabled = false;
+            enemyHitbox.enabled = false;
         }
 
         DropKey();
         chaseSpeed = 0;
         patrolSpeed = 0;
-        enemyAnimator.SetBool("Walking", false); // Stop walking animation on excision
-        enemyAnimator.SetBool("Idle", true); // Switch to idle animation on excision
+        ResetAllAnimations();
     }
 
     public void DeathSound()
@@ -249,10 +289,19 @@ public class EnemyAI : MonoBehaviour
         _key.SetActive(true);
     }
 
+    private void LimitVelocity()
+    {
+        if (agent.velocity.magnitude > maxVelocity)
+        {
+            agent.velocity = agent.velocity.normalized * maxVelocity;
+        }
+    }
+
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, sightRange);
+        Gizmos.color = Color.yellow;
 
         Vector3 rayOrigin = transform.position + new Vector3(0, raycastHeightOffset, 0);
         Vector3 forwardDirection = transform.forward;

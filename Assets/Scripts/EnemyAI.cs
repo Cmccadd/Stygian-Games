@@ -54,7 +54,6 @@ public class EnemyAI : MonoBehaviour
 
     private bool isExcised = false;
     private bool roared;
-    private bool isAttacking = false;
     [SerializeField] private GameObject _key;
     [SerializeField] private GameObject _deathAnim;
     [SerializeField] private GameObject _enemyNoticeObject;
@@ -71,7 +70,7 @@ public class EnemyAI : MonoBehaviour
         if (playerController.isHidden)
         {
             chaseTimer = 0f;
-            _enemyNoticeAnimator.SetBool("Noticed", false);  // Set "Noticed" to false when player is hidden
+            _enemyNoticeAnimator.SetBool("Noticed", false);
             Patroling();
             return;
         }
@@ -82,7 +81,7 @@ public class EnemyAI : MonoBehaviour
         if (playerInSightRange || playerInRaycast)
         {
             chaseTimer = chaseDuration;
-            _enemyNoticeAnimator.SetBool("Noticed", true);  // Set "Noticed" to true when player is detected
+            _enemyNoticeAnimator.SetBool("Noticed", true);
             if (!roared)
             {
                 roared = true;
@@ -91,15 +90,19 @@ public class EnemyAI : MonoBehaviour
         }
         else
         {
-            _enemyNoticeAnimator.SetBool("Noticed", false);  // Set "Noticed" to false when player is not detected
+            _enemyNoticeAnimator.SetBool("Noticed", false);
         }
 
-
         if (chaseTimer > 0) chaseTimer -= Time.deltaTime;
+
+        // Always reset movement to active in the Update loop if not waiting
+        if (!isWaiting) agent.isStopped = false;
 
         LimitVelocity();
 
         UpdateAnimationDirectionAndTurning();
+
+        UpdateState();
     }
 
     private void InitializeEnemy()
@@ -209,8 +212,8 @@ public class EnemyAI : MonoBehaviour
             yield return null;
         }
 
-        agent.isStopped = false;
         isWaiting = false;
+        agent.isStopped = false;
         walkPointSet = false;
     }
 
@@ -218,7 +221,6 @@ public class EnemyAI : MonoBehaviour
     {
         Vector3 directionToPlayer = (player.position - transform.position).normalized;
         float angle = Vector3.SignedAngle(transform.forward, directionToPlayer, Vector3.up);
-        float turnSpeed = Mathf.Abs(agent.angularSpeed);
 
         ResetAllAnimations();
 
@@ -238,8 +240,6 @@ public class EnemyAI : MonoBehaviour
             enemyAnimator.SetBool("Left", true);
         else if (angle > -67.5f && angle <= -22.5f)
             enemyAnimator.SetBool("ForwardLeft", true);
-
-        enemyAnimator.SetFloat("TurnSpeed", turnSpeed);
     }
 
     private void ResetAllAnimations()
@@ -253,7 +253,6 @@ public class EnemyAI : MonoBehaviour
         enemyAnimator.SetBool("Left", false);
         enemyAnimator.SetBool("ForwardLeft", false);
     }
-
 
     public void Excise()
     {

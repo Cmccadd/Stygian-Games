@@ -29,6 +29,7 @@ public class EnemyAI : MonoBehaviour
 
     [Header("Detection Settings")]
     public float sightRange = 30f;
+    public float attackRange = 2f;  // New field for attack range
     public float coneAngle = 60f;
     public int coneResolution = 20;
     public bool playerInSightRange;
@@ -54,6 +55,7 @@ public class EnemyAI : MonoBehaviour
 
     private bool isExcised = false;
     private bool roared;
+    private bool isAttacking = false; // New bool for attack animation control
     [SerializeField] private GameObject _key;
     [SerializeField] private GameObject _deathAnim;
     [SerializeField] private GameObject _enemyNoticeObject;
@@ -72,6 +74,7 @@ public class EnemyAI : MonoBehaviour
             chaseTimer = 0f;
             _enemyNoticeAnimator.SetBool("Noticed", false);
             Patroling();
+            StopAttack();  // Stop attack if player hides
             return;
         }
 
@@ -102,7 +105,15 @@ public class EnemyAI : MonoBehaviour
 
         UpdateAnimationDirectionAndTurning();
 
-        UpdateState();
+        if (Vector3.Distance(transform.position, player.position) <= attackRange)
+        {
+            StartAttack();  // Start attack when within range
+        }
+        else
+        {
+            StopAttack();  // Stop attack when out of range
+            UpdateState();
+        }
     }
 
     private void InitializeEnemy()
@@ -252,6 +263,27 @@ public class EnemyAI : MonoBehaviour
         enemyAnimator.SetBool("BackwardLeft", false);
         enemyAnimator.SetBool("Left", false);
         enemyAnimator.SetBool("ForwardLeft", false);
+        enemyAnimator.SetBool("isAttacking", false);  // Reset attack bool
+    }
+
+    private void StartAttack()
+    {
+        if (!isAttacking)
+        {
+            isAttacking = true;
+            agent.isStopped = true;
+            enemyAnimator.SetBool("isAttacking", true);  // Set attack animation to active
+        }
+    }
+
+    private void StopAttack()
+    {
+        if (isAttacking)
+        {
+            isAttacking = false;
+            agent.isStopped = false;
+            enemyAnimator.SetBool("isAttacking", false);  // Reset attack animation to inactive
+        }
     }
 
     public void Excise()

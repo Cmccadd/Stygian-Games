@@ -265,8 +265,9 @@ public class PlayerController : MonoBehaviour
                 // Check if the enemyCollider is still valid (not null) before accessing its EnemyAI component
                 if (enemyCollider != null)
                 {
+
                     EnemyAI enemy = enemyCollider.GetComponent<EnemyAI>();
-                    //EnemyAIPreist preist = enemyCollider.GetComponent<EnemyAIPreist>();
+
                     if (enemy != null) // Ensure the enemy is not destroyed
                     {
                         enemy.Excise();

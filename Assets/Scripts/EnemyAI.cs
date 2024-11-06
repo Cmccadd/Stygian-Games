@@ -67,6 +67,11 @@ public class EnemyAI : MonoBehaviour
         InitializeEnemy();
     }
 
+    public void EnemyRoars()
+    {
+        _myAudioSource.PlayOneShot(_enemyRoar);
+    }
+
     private void Update()
     {
         if (playerController.isHidden)

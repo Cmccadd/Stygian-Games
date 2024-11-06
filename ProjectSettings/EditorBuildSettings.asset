@@ -15,6 +15,9 @@ EditorBuildSettings:
     path: Assets/Scenes/Game Scenes/Scene 1 Church 1.unity
     guid: a13cc138fc472484a99c62d81ab8bc82
   - enabled: 1
+    path: Assets/Scenes/Game Scenes/Scene 2.unity
+    guid: ab11b202bd336774b99814bb176d38ee
+  - enabled: 1
     path: Assets/Scenes/Game Scenes/EndScene.unity
     guid: 9fcfde99a0fcdc04382d32ba5a74165f
   - enabled: 0
@@ -23,9 +26,6 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Game Scenes/Prototype_Scene_2.unity
     guid: dde4d7f38bad75b44b6b822ff1dac984
-  - enabled: 0
-    path: Assets/Scenes/Game Scenes/Scene 2.unity
-    guid: ab11b202bd336774b99814bb176d38ee
   - enabled: 0
     path: Assets/Scenes/Game Scenes/Scene 3.unity
     guid: 5357a2f17a6e5cc41b983a016c012010

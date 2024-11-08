@@ -119,6 +119,13 @@ public class EnemyAI : MonoBehaviour
             StopAttack();  // Stop attack when out of range
             UpdateState();
         }
+
+
+        if(chaseTimer > 0)
+        {
+            _enemyNoticeAnimator.SetBool("Noticed", true);
+
+        }
     }
 
     private void InitializeEnemy()

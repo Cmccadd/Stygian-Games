@@ -37,7 +37,7 @@ public class TakeDamage : MonoBehaviour
             // If health reaches zero, trigger a game over
             if (healthCount <= 0)
             {
-                playerController.Dead();
+                playerController.Crush();
                 _animator.SetBool("Die", true);
                 _deathTransition.SetActive(true);
                 //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);

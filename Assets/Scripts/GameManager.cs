@@ -95,5 +95,10 @@ public class GameManager : MonoBehaviour
         {
             ExorcismIndicator.SetActive(show);
         }
+        else
+        {
+            ExorcismIndicator.SetActive(false);
+
+        }
     }
 }

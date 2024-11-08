@@ -368,4 +368,10 @@ public class PlayerController : MonoBehaviour
         //_myAudioSource.PlayOneShot(_deathSFX);
         dying = true;
     }
+
+    public void Crush()
+    {
+        _myAudioSource.PlayOneShot(_deathSFX);
+        dying = true;
+    }
 }

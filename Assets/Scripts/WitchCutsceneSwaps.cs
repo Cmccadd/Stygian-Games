@@ -8,6 +8,8 @@ public class WitchCutsceneSwaps : MonoBehaviour
     [SerializeField] private GameObject _blueTorch;
     [SerializeField] private GameObject _cutsceneCam;
     [SerializeField] private GameObject _enemyIndicator;
+    [SerializeField] private AudioSource _myAudioSource;
+    [SerializeField] private AudioClip _fire;
     public void TurnOnOffStuff()
     {
         _witch.SetActive(true);
@@ -24,6 +26,7 @@ public class WitchCutsceneSwaps : MonoBehaviour
     public void TurnOnFire()
     {
         _fireBurst.SetActive(true);
+        _myAudioSource.PlayOneShot(_fire);
     }
 
     public void TurnOffFire()

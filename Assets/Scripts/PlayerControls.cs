@@ -52,6 +52,7 @@ public class PlayerController : MonoBehaviour
         playerCollider = GetComponent<Collider>();
 
         gameManager = FindObjectOfType<GameManager>();
+        inventory = FindObjectOfType<Inventory>();
         _checkpointManager = FindObjectOfType<CheckpointManager>();
         transform.position = _checkpointManager.LastCheckPointPos;
 

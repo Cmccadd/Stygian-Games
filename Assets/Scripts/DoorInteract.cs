@@ -7,8 +7,9 @@ public class DoorInteract : Interactable
 
     public override void InteractWith(PlayerController player)
     {
-        base.InteractWith(player);
         _fadeOut.SetActive(true);
+        base.InteractWith(player);
+        
     }
     private void OnTriggerEnter(Collider other)
     {

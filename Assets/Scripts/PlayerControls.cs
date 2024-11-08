@@ -51,6 +51,7 @@ public class PlayerController : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         playerCollider = GetComponent<Collider>();
 
+        gameManager = FindObjectOfType<GameManager>();
         _checkpointManager = FindObjectOfType<CheckpointManager>();
         transform.position = _checkpointManager.LastCheckPointPos;
 
@@ -194,8 +195,10 @@ public class PlayerController : MonoBehaviour
                 }
             }
         }
-
-        gameManager.ToggleExorcismIndicator(enemyInRange);  // Show or hide exorcism UI based on proximity
+        if (inventory.HasItem(excursionItemName))
+        {
+            gameManager.ToggleExorcismIndicator(enemyInRange);  // Show or hide exorcism UI based on proximity
+        }
     }
 
     private void MovePlayer()

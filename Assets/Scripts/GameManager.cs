@@ -5,17 +5,18 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    public TMP_Text healthStats; // Grab the text object
-    public TakeDamage takeDamage; // Grab the script for taking damage
+    public TMP_Text healthStats;
+    public TakeDamage takeDamage;
 
     [SerializeField] private PlayerInput myPlayerInput;
     private InputAction quit;
     private InputAction restart;
 
     [Header("UI Settings")]
-    public GameObject Sigil;  // UI for Sigil
-    public GameObject Key;    // UI for Key
-    public GameObject Flint;  // UI for Flint
+    public GameObject Sigil;
+    public GameObject Key;
+    public GameObject Flint;
+    public GameObject ExorcismIndicator;  // New UI indicator for exorcism
 
     private void Start()
     {
@@ -27,38 +28,35 @@ public class GameManager : MonoBehaviour
         quit.performed += Quit_performed;
         restart.performed += Restart_performed;
 
-        // Initially hide the special item UI panels
-
+        // Hide all special item UI panels initially
         Sigil?.SetActive(false);
         Key?.SetActive(false);
         Flint?.SetActive(false);
+        ExorcismIndicator?.SetActive(false);  // Hide exorcism indicator initially
     }
 
     private void Restart_performed(InputAction.CallbackContext context)
     {
-        Debug.Log("Restart Game");
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     private void Quit_performed(InputAction.CallbackContext context)
     {
-        Debug.Log("Quit Game");
         Application.Quit();
     }
 
     public void UpdateHealth()
     {
-        if (takeDamage.healthCount > 0) // Only update health if health isn't at 0
+        if (takeDamage.healthCount > 0)
         {
-            healthStats.text = "Health: " + takeDamage.healthCount; // Display the health stats
+            healthStats.text = "Health: " + takeDamage.healthCount;
         }
         else
         {
-            healthStats.gameObject.SetActive(false); // Disable the health text on the game over screen
+            healthStats.gameObject.SetActive(false);
         }
     }
 
-    // Show UI for a specific item based on its name
     public void ShowItemUI(string itemName)
     {
         if (itemName == "Sigil" && Sigil != null)
@@ -75,7 +73,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // Hide UI for a specific item based on its name
     public void HideItemUI(string itemName)
     {
         if (itemName == "Sigil" && Sigil != null)
@@ -89,6 +86,14 @@ public class GameManager : MonoBehaviour
         else if (itemName == "Flint" && Flint != null)
         {
             Flint.SetActive(false);
+        }
+    }
+
+    public void ToggleExorcismIndicator(bool show)
+    {
+        if (ExorcismIndicator != null)
+        {
+            ExorcismIndicator.SetActive(show);
         }
     }
 }

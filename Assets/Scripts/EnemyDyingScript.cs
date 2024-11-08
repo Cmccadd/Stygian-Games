@@ -13,4 +13,9 @@ public EnemyAI EnemyAI;
     {
         EnemyAI.DeathSound();
     }
+
+    public void AttackSound()
+    {
+        EnemyAI.EnemyRoars();
+    }
 }

@@ -43,6 +43,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private AudioClip _deathSFX;
     [SerializeField] private AudioSource _myAudioSource;
 
+    private GameManager gameManager;  // Reference to GameManager
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -171,6 +173,29 @@ public class PlayerController : MonoBehaviour
         {
             _walkingSFX.SetActive(false);
         }
+
+        CheckForNearbyEnemies();
+    }
+
+    private void CheckForNearbyEnemies()
+    {
+        bool enemyInRange = false;
+        enemiesInRange = Physics.OverlapSphere(transform.position, exorcismRange, LayerMask.GetMask("Enemy"));
+
+        foreach (Collider enemyCollider in enemiesInRange)
+        {
+            if (enemyCollider != null)
+            {
+                EnemyAI enemy = enemyCollider.GetComponent<EnemyAI>();
+                if (enemy != null)
+                {
+                    enemyInRange = true;
+                    break;
+                }
+            }
+        }
+
+        gameManager.ToggleExorcismIndicator(enemyInRange);  // Show or hide exorcism UI based on proximity
     }
 
     private void MovePlayer()
@@ -182,9 +207,7 @@ public class PlayerController : MonoBehaviour
             rb.velocity = movement;
             _animator.SetBool("Moving", true);
         }
-    }
-
-    private void Jump()
+    }    private void Jump()
     {
         rb.velocity = new Vector3(rb.velocity.x, jumpForce, rb.velocity.z);
     }
@@ -343,7 +366,7 @@ public class PlayerController : MonoBehaviour
 
     public void Dead()
     {
-        _myAudioSource.PlayOneShot(_deathSFX);
+        //_myAudioSource.PlayOneShot(_deathSFX);
         dying = true;
     }
 }

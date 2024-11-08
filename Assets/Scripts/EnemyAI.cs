@@ -67,6 +67,11 @@ public class EnemyAI : MonoBehaviour
         InitializeEnemy();
     }
 
+    public void EnemyRoars()
+    {
+        _myAudioSource.PlayOneShot(_enemyRoar);
+    }
+
     private void Update()
     {
         if (playerController.isHidden)
@@ -113,6 +118,13 @@ public class EnemyAI : MonoBehaviour
         {
             StopAttack();  // Stop attack when out of range
             UpdateState();
+        }
+
+
+        if(chaseTimer > 0)
+        {
+            _enemyNoticeAnimator.SetBool("Noticed", true);
+
         }
     }
 

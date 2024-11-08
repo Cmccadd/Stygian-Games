@@ -199,6 +199,7 @@ public class PlayerController : MonoBehaviour
         {
             gameManager.ToggleExorcismIndicator(enemyInRange);  // Show or hide exorcism UI based on proximity
         }
+
     }
 
     private void MovePlayer()
@@ -278,35 +279,30 @@ public class PlayerController : MonoBehaviour
     // Check for enemies in the exorcism range and use the excursion item if available
     private void UseExcursionItemOnEnemies()
     {
-        // Check if the player has the required excursion item in the inventory
         if (inventory.HasItem(excursionItemName))
         {
-            // Get all colliders in the exorcism range
             enemiesInRange = Physics.OverlapSphere(transform.position, exorcismRange, LayerMask.GetMask("Enemy"));
-
-            bool enemyInRange = false; // Track if any enemy is in range
+            bool enemyInRange = false;
 
             foreach (Collider enemyCollider in enemiesInRange)
             {
-                // Check if the enemyCollider is still valid (not null) before accessing its EnemyAI component
                 if (enemyCollider != null)
                 {
-
                     EnemyAI enemy = enemyCollider.GetComponent<EnemyAI>();
-
-                    if (enemy != null) // Ensure the enemy is not destroyed
+                    if (enemy != null)
                     {
                         enemy.Excise();
-                        enemyInRange = true; // Mark that an enemy was in range
+                        enemyInRange = true;
                     }
                 }
             }
 
-            // Only use the Sigil if an enemy was exorcised
             if (enemyInRange)
             {
                 _animator.Play("Will_Exorcise_Anim");
                 inventory.UseItem(excursionItemName);
+
+                gameManager.ToggleExorcismIndicator(false);  // Turn off the UI indicator
                 Debug.Log("Sigil used to exorcise enemy.");
             }
             else

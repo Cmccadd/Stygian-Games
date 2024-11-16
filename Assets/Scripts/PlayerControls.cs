@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed = 5f;
     public float jumpForce = 5.5f;
     public GameObject groundCheck;
+    [SerializeField] private GameObject _interactIcon;
     public LayerMask ground;
 
     private Vector2 inputDirection;
@@ -339,6 +340,10 @@ public class PlayerController : MonoBehaviour
             insideHideSpot = false; // Reset when leaving hideable area
             _hideIndicator.SetActive(false);
         }
+        if (other.gameObject.tag == "Interactable")
+        {
+            _interactIcon.SetActive(false);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -351,6 +356,10 @@ public class PlayerController : MonoBehaviour
         if (other.CompareTag("Cutscene"))
         {
             dying = true;
+        }
+        if (other.gameObject.tag == "Interactable")
+        {
+            _interactIcon.SetActive(true);
         }
     }
 

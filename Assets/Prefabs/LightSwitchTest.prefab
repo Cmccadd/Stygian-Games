@@ -4931,6 +4931,7 @@ MonoBehaviour:
   _leverpull: {fileID: 0}
   _leverAnimator: {fileID: 0}
   _levelAudioSource: {fileID: 0}
+  _interactIcon: {fileID: 0}
 --- !u!212 &8167054892125528079
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -5311,7 +5312,7 @@ GameObject:
   - component: {fileID: 1109262793301524155}
   m_Layer: 0
   m_Name: On
-  m_TagString: Untagged
+  m_TagString: Interactable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5503,6 +5504,7 @@ MonoBehaviour:
   _leverpull: {fileID: 8300000, guid: 2fbd3c18899e5bc4fbf112c0cff5b0d0, type: 3}
   _leverAnimator: {fileID: 6118100302074944816}
   _levelAudioSource: {fileID: 0}
+  _interactIcon: {fileID: 0}
 --- !u!212 &6451289330333568125
 SpriteRenderer:
   m_ObjectHideFlags: 0

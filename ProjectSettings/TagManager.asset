@@ -9,6 +9,7 @@ TagManager:
   - Hideable
   - Crush
   - Cutscene
+  - Interactable
   layers:
   - Default
   - TransparentFX

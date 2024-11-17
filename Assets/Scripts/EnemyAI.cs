@@ -60,6 +60,8 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private GameObject _deathAnim;
     [SerializeField] private GameObject _enemyNoticeObject;
 
+    private bool chasing;
+
     private void Start()
     {
         player = GameObject.FindWithTag("Player").transform;
@@ -74,8 +76,15 @@ public class EnemyAI : MonoBehaviour
 
     private void Update()
     {
+        if (chasing)
+        {
+            agent.SetDestination(player.position);
+        }
+
         if (playerController.isHidden)
         {
+            playerController.CanHide();
+            chasing = false;
             chaseTimer = 0f;
             _enemyNoticeAnimator.SetBool("Noticed", false);
             Patroling();
@@ -157,6 +166,8 @@ public class EnemyAI : MonoBehaviour
         else
         {
             Patroling();
+            playerController.CanHide();
+            chasing = false;
             roared = false;
         }
     }
@@ -217,6 +228,8 @@ public class EnemyAI : MonoBehaviour
 
     private void ChasePlayer()
     {
+        playerController.CantHide();
+        chasing = true;
         agent.isStopped = false;
         agent.speed = chaseSpeed;
         agent.SetDestination(player.position);

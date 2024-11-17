@@ -7,6 +7,7 @@ public class TakeDamage : MonoBehaviour
 {
     public float healthCount = 3; // Keep track of how much health the player has
     public GameObject _deathTransition; // Grab the Game Over screen object
+    public GameObject _basicDeathTransition;
     public GameManager gameManager;
     [SerializeField] private Animator _animator;
     public PlayerController playerController;
@@ -39,7 +40,7 @@ public class TakeDamage : MonoBehaviour
             {
                 playerController.Crush();
                 _animator.SetBool("Die", true);
-                _deathTransition.SetActive(true);
+                _basicDeathTransition.SetActive(true);
                 //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
         }

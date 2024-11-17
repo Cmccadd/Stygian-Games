@@ -44,6 +44,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private AudioClip _deathSFX;
     [SerializeField] private AudioSource _myAudioSource;
 
+    private bool canHide;
+
     private GameManager gameManager;  // Reference to GameManager
 
     private void Awake()
@@ -93,10 +95,20 @@ public class PlayerController : MonoBehaviour
     public void OnHide(InputValue value)
     {
         // Only allow hiding if the player is near or inside a hideable object
-        if (value.isPressed && nearHideableObject && insideHideSpot)
+        if (value.isPressed && nearHideableObject && insideHideSpot && canHide)
         {
             ToggleHide();
         }
+    }
+
+    public void CantHide()
+    {
+        canHide = false;
+    }
+
+    public void CanHide()
+    {
+        canHide = true;
     }
 
     public void OnInteract(InputValue value)
@@ -348,7 +360,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Hideable"))
+        if (other.CompareTag("Hideable") && canHide == true)
         {
             nearHideableObject = true;
             _hideIndicator.SetActive(true);

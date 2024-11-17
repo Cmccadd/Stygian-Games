@@ -8,8 +8,8 @@ public class CrankController : Interactable
     //public GameObject _interactIcon;
     public Rigidbody Rigidbody;
     public bool PlayerInteracting;
-    [SerializeField] private int _crankCooldown = 2;
-    [SerializeField] private int _crankRate = 5;
+    [SerializeField] private float _crankCooldown;
+    [SerializeField] private float _crankRate;
     [SerializeField] Animator _crankAnimator;
 
     // InteractWith now takes a PlayerController parameter to match the base class

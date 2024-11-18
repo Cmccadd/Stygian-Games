@@ -15,7 +15,7 @@ public class EnemyAI : MonoBehaviour
     private int patrolIndex;
     private bool walkPointSet;
     public float patrolWaitTime = 2f;
-    private bool isWaiting;
+    [SerializeField]private bool isWaiting;
 
     [Header("Speed Settings")]
     public float patrolSpeed = 3.5f;

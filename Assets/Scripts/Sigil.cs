@@ -18,7 +18,7 @@ public class Sigil : Interactable
             {
                 gameManager.ShowItemUI("Sigil");
             }
-
+            //_interactIcon.SetActive(false);
             Debug.Log($"{sigilItem.itemName} added to inventory.");
             // Only destroy the game object after adding it to the inventory
             Destroy(gameObject);

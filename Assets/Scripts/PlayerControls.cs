@@ -244,6 +244,7 @@ public class PlayerController : MonoBehaviour
 
         if (isHidden)
         {
+            TakeDamage.CanGetHit = false;
             rb.velocity = Vector3.zero;
             _animator.SetBool("Hiding", true);
             _enemyNoticeAnimator.SetBool("Hidden", true);
@@ -261,6 +262,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
+            TakeDamage.CanGetHit = true;
             _animator.SetBool("Hiding", false);
             _enemyNoticeAnimator.SetBool("Hidden", false);
             //spriteRenderer.enabled = true;

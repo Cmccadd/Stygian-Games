@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class TakeDamage : MonoBehaviour
 {
@@ -11,6 +8,9 @@ public class TakeDamage : MonoBehaviour
     public GameManager gameManager;
     [SerializeField] private Animator _animator;
     public PlayerController playerController;
+    [SerializeField] private bool canGetHit;
+
+    public bool CanGetHit { get => canGetHit; set => canGetHit = value; }
 
     // If the player collides with an enemy, reduce health by 1
     private void OnCollisionEnter(Collision collision)

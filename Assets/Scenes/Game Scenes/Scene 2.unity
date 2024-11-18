@@ -21970,7 +21970,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 479842093}
   m_CullTransparentMesh: 1
---- !u!43 &494658810
+--- !u!43 &491711334
 Mesh:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -47003,6 +47003,10 @@ PrefabInstance:
       propertyPath: itemPickupUI
       value: 
       objectReference: {fileID: 1708272242}
+    - target: {fileID: 53886135332042228, guid: 236254cc48748294ca1ef8bfc717c7d4, type: 3}
+      propertyPath: _interactIcon
+      value: 
+      objectReference: {fileID: 2039971822}
     - target: {fileID: 3384571270684129729, guid: 236254cc48748294ca1ef8bfc717c7d4, type: 3}
       propertyPath: m_Name
       value: Sigil

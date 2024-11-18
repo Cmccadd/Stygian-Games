@@ -44,6 +44,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private AudioClip _deathSFX;
     [SerializeField] private AudioSource _myAudioSource;
 
+    [SerializeField] private TakeDamage TakeDamage;
+
     //private bool canHide;
 
     private GameManager gameManager;  // Reference to GameManager
@@ -52,6 +54,7 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        TakeDamage = GetComponent<TakeDamage>();
         playerCollider = GetComponent<Collider>();
 
         gameManager = FindObjectOfType<GameManager>();

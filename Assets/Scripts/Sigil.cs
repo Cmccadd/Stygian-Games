@@ -4,7 +4,7 @@ public class Sigil : Interactable
 {
     public InventoryItem sigilItem; // Reference to the ScriptableObject for the item
     public GameObject itemPickupUI;  // Reference to the UI GameObject
-    //[SerializeField] private GameObject _interactIcon;
+    [SerializeField] private GameObject _interactIcon;
     public override void InteractWith(PlayerController player)
     {
         base.InteractWith(player);
@@ -18,7 +18,7 @@ public class Sigil : Interactable
             {
                 gameManager.ShowItemUI("Sigil");
             }
-            //_interactIcon.SetActive(false);
+            _interactIcon.SetActive(false);
             Debug.Log($"{sigilItem.itemName} added to inventory.");
             // Only destroy the game object after adding it to the inventory
             Destroy(gameObject);

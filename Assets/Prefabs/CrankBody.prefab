@@ -19,7 +19,7 @@ GameObject:
   m_TagString: Interactable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &7726505125031601171
 Transform:
@@ -125,7 +125,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Gate: {fileID: 0}
   CrankSFX: {fileID: 8077272276021759337}
-  _interactIcon: {fileID: 0}
   Rigidbody: {fileID: 0}
   PlayerInteracting: 0
   _crankCooldown: 1
@@ -169,7 +168,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &3422880732822878402
 Transform:
@@ -274,7 +273,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &71995599486311117
 Transform:

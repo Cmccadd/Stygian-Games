@@ -8,7 +8,7 @@ public class LeverController : Interactable
     [SerializeField] private AudioClip _leverpull;
     [SerializeField] private Animator _leverAnimator;
     [SerializeField] private AudioSource _levelAudioSource;
-    [SerializeField] private GameObject _interactIcon;
+    //[SerializeField] private GameObject _interactIcon;
     public override void InteractWith(PlayerController player)
     {
         base.InteractWith(player);
@@ -36,19 +36,19 @@ public class LeverController : Interactable
         }
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            _interactIcon.SetActive(true);
-        }
-    }
+    //private void OnTriggerEnter(Collider other)
+    //{
+    //    if (other.CompareTag("Player"))
+    //    {
+    //        _interactIcon.SetActive(true);
+    //    }
+    //}
 
-    void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            _interactIcon.SetActive(false);
-        }
-    }
+    //void OnTriggerExit(Collider other)
+    //{
+    //    if (other.CompareTag("Player"))
+    //    {
+    //        _interactIcon.SetActive(false);
+    //    }
+    //}
 }

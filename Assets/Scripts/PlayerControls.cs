@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed = 5f;
     public float jumpForce = 5.5f;
     public GameObject groundCheck;
+    [SerializeField] private GameObject _interactIcon;
     public LayerMask ground;
 
     private Vector2 inputDirection;
@@ -43,15 +44,21 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private AudioClip _deathSFX;
     [SerializeField] private AudioSource _myAudioSource;
 
+    [SerializeField] private TakeDamage TakeDamage;
+
+    //private bool canHide;
+
     private GameManager gameManager;  // Reference to GameManager
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        TakeDamage = GetComponent<TakeDamage>();
         playerCollider = GetComponent<Collider>();
 
         gameManager = FindObjectOfType<GameManager>();
+        inventory = FindObjectOfType<Inventory>();
         _checkpointManager = FindObjectOfType<CheckpointManager>();
         transform.position = _checkpointManager.LastCheckPointPos;
 
@@ -91,10 +98,20 @@ public class PlayerController : MonoBehaviour
     public void OnHide(InputValue value)
     {
         // Only allow hiding if the player is near or inside a hideable object
-        if (value.isPressed && nearHideableObject && insideHideSpot)
+        if (value.isPressed && nearHideableObject && insideHideSpot /*&& canHide*/)
         {
             ToggleHide();
         }
+    }
+
+    public void CantHide()
+    {
+       // canHide = false;
+    }
+
+    public void CanHide()
+    {
+       // canHide = true;
     }
 
     public void OnInteract(InputValue value)
@@ -227,6 +244,7 @@ public class PlayerController : MonoBehaviour
 
         if (isHidden)
         {
+            TakeDamage.CanGetHit = false;
             rb.velocity = Vector3.zero;
             _animator.SetBool("Hiding", true);
             _enemyNoticeAnimator.SetBool("Hidden", true);
@@ -244,6 +262,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
+            TakeDamage.CanGetHit = true;
             _animator.SetBool("Hiding", false);
             _enemyNoticeAnimator.SetBool("Hidden", false);
             //spriteRenderer.enabled = true;
@@ -338,11 +357,15 @@ public class PlayerController : MonoBehaviour
             insideHideSpot = false; // Reset when leaving hideable area
             _hideIndicator.SetActive(false);
         }
+        if (other.gameObject.tag == "Interactable")
+        {
+            _interactIcon.SetActive(false);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Hideable"))
+        if (other.CompareTag("Hideable")/* && canHide == true*/)
         {
             nearHideableObject = true;
             _hideIndicator.SetActive(true);
@@ -350,6 +373,10 @@ public class PlayerController : MonoBehaviour
         if (other.CompareTag("Cutscene"))
         {
             dying = true;
+        }
+        if (other.gameObject.tag == "Interactable")
+        {
+            _interactIcon.SetActive(true);
         }
     }
 
@@ -366,6 +393,12 @@ public class PlayerController : MonoBehaviour
     public void Dead()
     {
         //_myAudioSource.PlayOneShot(_deathSFX);
+        dying = true;
+    }
+
+    public void Crush()
+    {
+        _myAudioSource.PlayOneShot(_deathSFX);
         dying = true;
     }
 }

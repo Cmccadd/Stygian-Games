@@ -14,8 +14,9 @@ public class EnemyAI : MonoBehaviour
     public Transform[] patrolPoints;
     private int patrolIndex;
     private bool walkPointSet;
+    [SerializeField] private bool canLook;
     public float patrolWaitTime = 2f;
-    private bool isWaiting;
+    [SerializeField]private bool isWaiting;
 
     [Header("Speed Settings")]
     public float patrolSpeed = 3.5f;
@@ -60,6 +61,8 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private GameObject _deathAnim;
     [SerializeField] private GameObject _enemyNoticeObject;
 
+    private bool chasing;
+
     private void Start()
     {
         player = GameObject.FindWithTag("Player").transform;
@@ -74,8 +77,15 @@ public class EnemyAI : MonoBehaviour
 
     private void Update()
     {
+        if (chasing)
+        {
+            agent.SetDestination(player.position);
+        }
+
         if (playerController.isHidden)
         {
+            playerController.CanHide();
+            chasing = false;
             chaseTimer = 0f;
             _enemyNoticeAnimator.SetBool("Noticed", false);
             Patroling();
@@ -157,6 +167,8 @@ public class EnemyAI : MonoBehaviour
         else
         {
             Patroling();
+            playerController.CanHide();
+            chasing = false;
             roared = false;
         }
     }
@@ -203,8 +215,14 @@ public class EnemyAI : MonoBehaviour
 
         if (walkPointSet && agent.remainingDistance < agent.stoppingDistance && !isWaiting)
         {
-            walkPointSet = false;
-            StartCoroutine(LookAroundAtPatrolPoint());
+            if (canLook)
+            {
+                print("firsttest");
+                canLook = false;
+                walkPointSet = false;
+                StartCoroutine(LookAroundAtPatrolPoint());
+            }
+            
         }
     }
 
@@ -217,6 +235,8 @@ public class EnemyAI : MonoBehaviour
 
     private void ChasePlayer()
     {
+        playerController.CantHide();
+        chasing = true;
         agent.isStopped = false;
         agent.speed = chaseSpeed;
         agent.SetDestination(player.position);
@@ -224,20 +244,25 @@ public class EnemyAI : MonoBehaviour
 
     private IEnumerator LookAroundAtPatrolPoint()
     {
-        isWaiting = true;
-        agent.isStopped = true;
 
-        float lookTime = patrolWaitTime;
-        while (lookTime > 0f)
-        {
-            transform.Rotate(0, 120 * Time.deltaTime, 0);
-            lookTime -= Time.deltaTime;
-            yield return null;
-        }
+            print("test");
+            isWaiting = true;
+            agent.isStopped = true;
 
-        isWaiting = false;
-        agent.isStopped = false;
-        walkPointSet = false;
+            float lookTime = patrolWaitTime;
+            while (lookTime > 0f)
+            {
+                transform.Rotate(0, 120 * Time.deltaTime, 0);
+                lookTime -= Time.deltaTime;
+                yield return null;
+            }
+
+            isWaiting = false;
+            agent.isStopped = false;
+            walkPointSet = false;
+        yield return new WaitForSeconds(2);
+            canLook = true;
+       yield return null;
     }
 
     private void UpdateAnimationDirectionAndTurning()

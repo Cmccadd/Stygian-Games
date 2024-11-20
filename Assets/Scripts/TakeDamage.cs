@@ -1,15 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class TakeDamage : MonoBehaviour
 {
     public float healthCount = 3; // Keep track of how much health the player has
     public GameObject _deathTransition; // Grab the Game Over screen object
+    public GameObject _basicDeathTransition;
     public GameManager gameManager;
     [SerializeField] private Animator _animator;
     public PlayerController playerController;
+    [SerializeField] private bool canGetHit;
+
+    public bool CanGetHit { get => canGetHit; set => canGetHit = value; }
 
     // If the player collides with an enemy, reduce health by 1
     private void OnCollisionEnter(Collision collision)
@@ -37,9 +38,9 @@ public class TakeDamage : MonoBehaviour
             // If health reaches zero, trigger a game over
             if (healthCount <= 0)
             {
-                playerController.Dead();
+                playerController.Crush();
                 _animator.SetBool("Die", true);
-                _deathTransition.SetActive(true);
+                _basicDeathTransition.SetActive(true);
                 //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
         }

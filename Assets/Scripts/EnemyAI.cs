@@ -211,6 +211,7 @@ public class EnemyAI : MonoBehaviour
         else if (!isWaiting)
         {
             ResetAllAnimations();
+
         }
 
         if (walkPointSet && agent.remainingDistance < agent.stoppingDistance && !isWaiting)
@@ -288,6 +289,7 @@ public class EnemyAI : MonoBehaviour
             enemyAnimator.SetBool("Left", true);
         else if (angle > -67.5f && angle <= -22.5f)
             enemyAnimator.SetBool("ForwardLeft", true);
+
     }
 
     private void ResetAllAnimations()
@@ -301,6 +303,7 @@ public class EnemyAI : MonoBehaviour
         enemyAnimator.SetBool("Left", false);
         enemyAnimator.SetBool("ForwardLeft", false);
         enemyAnimator.SetBool("isAttacking", false);  // Reset attack bool
+
     }
 
     private void StartAttack()

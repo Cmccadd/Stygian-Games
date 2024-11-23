@@ -62,6 +62,7 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private GameObject _enemyNoticeObject;
     private bool isCurrentlyIdle = false;
     private bool isCurrentlyWalking = false;
+    public float RotationSpeed;
 
 
     private bool chasing;
@@ -80,9 +81,17 @@ public class EnemyAI : MonoBehaviour
 
     private void Update()
     {
+        //if (isWaiting)
+        //{
+        //    enemyAnimator.SetBool("Forward", false);
+        //    enemyAnimator.SetBool("Idle", true);
+        //}
+
         if (chasing)
         {
             agent.SetDestination(player.position);
+            enemyAnimator.SetBool("Forward", true);
+            enemyAnimator.SetBool("Idle", false);
         }
 
         if (playerController.isHidden)
@@ -283,11 +292,11 @@ public class EnemyAI : MonoBehaviour
 
 
         float lookTime = patrolWaitTime;
-        float rotationSpeed = 30f; // Slower rotation speed for looking around
+       //. float rotationSpeed = 30f; // Slower rotation speed for looking around
 
         while (lookTime > 0f)
         {
-            transform.Rotate(0, rotationSpeed * Time.deltaTime, 0);
+            transform.Rotate(0, RotationSpeed * Time.deltaTime, 0);
             lookTime -= Time.deltaTime;
             yield return null;
         }
@@ -296,7 +305,7 @@ public class EnemyAI : MonoBehaviour
         agent.isStopped = false;
         walkPointSet = false;
 
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(.5f);
         canLook = true;
     }
 

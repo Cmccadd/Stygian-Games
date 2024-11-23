@@ -16,7 +16,7 @@ public class EnemyAI : MonoBehaviour
     private bool walkPointSet;
     [SerializeField] private bool canLook;
     public float patrolWaitTime = 2f;
-    [SerializeField]private bool isWaiting;
+    [SerializeField] private bool isWaiting;
 
     [Header("Speed Settings")]
     public float patrolSpeed = 3.5f;
@@ -30,7 +30,7 @@ public class EnemyAI : MonoBehaviour
 
     [Header("Detection Settings")]
     public float sightRange = 30f;
-    public float attackRange = 2f;  // New field for attack range
+    public float attackRange = 2f;
     public float coneAngle = 60f;
     public int coneResolution = 20;
     public bool playerInSightRange;
@@ -56,10 +56,13 @@ public class EnemyAI : MonoBehaviour
 
     private bool isExcised = false;
     private bool roared;
-    private bool isAttacking = false; // New bool for attack animation control
+    private bool isAttacking = false;
     [SerializeField] private GameObject _key;
     [SerializeField] private GameObject _deathAnim;
     [SerializeField] private GameObject _enemyNoticeObject;
+    private bool isCurrentlyIdle = false;
+    private bool isCurrentlyWalking = false;
+
 
     private bool chasing;
 
@@ -89,7 +92,7 @@ public class EnemyAI : MonoBehaviour
             chaseTimer = 0f;
             _enemyNoticeAnimator.SetBool("Noticed", false);
             Patroling();
-            StopAttack();  // Stop attack if player hides
+            StopAttack();
             return;
         }
 
@@ -113,28 +116,39 @@ public class EnemyAI : MonoBehaviour
 
         if (chaseTimer > 0) chaseTimer -= Time.deltaTime;
 
-        // Always reset movement to active in the Update loop if not waiting
         if (!isWaiting) agent.isStopped = false;
 
         LimitVelocity();
-
-        UpdateAnimationDirectionAndTurning();
+        UpdateState();
 
         if (Vector3.Distance(transform.position, player.position) <= attackRange)
         {
-            StartAttack();  // Start attack when within range
+            StartAttack();
         }
         else
         {
-            StopAttack();  // Stop attack when out of range
-            UpdateState();
+            StopAttack();
         }
 
-
-        if(chaseTimer > 0)
+        // Handle animation transitions
+        float currentSpeed = agent.velocity.magnitude;
+        if (currentSpeed > 0.1f)
         {
-            _enemyNoticeAnimator.SetBool("Noticed", true);
-
+            if (!isCurrentlyWalking)
+            {
+                SetForwardAnimation();
+                isCurrentlyWalking = true;
+                isCurrentlyIdle = false;
+            }
+        }
+        else
+        {
+            if (!isCurrentlyIdle)
+            {
+                SetIdleAnimation();
+                isCurrentlyIdle = true;
+                isCurrentlyWalking = false;
+            }
         }
     }
 
@@ -208,111 +222,113 @@ public class EnemyAI : MonoBehaviour
         {
             SetNextPatrolPoint();
         }
-        else if (!isWaiting)
-        {
-            ResetAllAnimations();
 
-        }
-
-        if (walkPointSet && agent.remainingDistance < agent.stoppingDistance && !isWaiting)
+        // Check if agent is moving to the patrol point
+        if (walkPointSet && agent.remainingDistance > agent.stoppingDistance)
         {
-            if (canLook)
+            if (!isCurrentlyWalking)
             {
-                print("firsttest");
-                canLook = false;
-                walkPointSet = false;
-                StartCoroutine(LookAroundAtPatrolPoint());
+                SetForwardAnimation();
+                isCurrentlyWalking = true;
+                isCurrentlyIdle = false;
             }
-            
+        }
+        // Check if agent has arrived at the patrol point
+        else if (walkPointSet && agent.remainingDistance <= agent.stoppingDistance)
+        {
+            if (!isCurrentlyIdle)
+            {
+                SetIdleAnimation();
+                isCurrentlyIdle = true;
+                isCurrentlyWalking = false;
+
+                // Handle patrol wait/look around behavior
+                if (canLook)
+                {
+                    canLook = false;
+                    walkPointSet = false;
+                    StartCoroutine(LookAroundAtPatrolPoint());
+                }
+            }
         }
     }
 
     private void SetNextPatrolPoint()
     {
+        ResetAllAnimations();
         agent.SetDestination(patrolPoints[patrolIndex].position);
         walkPointSet = true;
         patrolIndex = (patrolIndex + 1) % patrolPoints.Length;
+
+        SetForwardAnimation(); // Start walking to the next point
+        isCurrentlyWalking = true;
+        isCurrentlyIdle = false;
     }
 
     private void ChasePlayer()
     {
+        ResetAllAnimations();
         playerController.CantHide();
         chasing = true;
         agent.isStopped = false;
         agent.speed = chaseSpeed;
         agent.SetDestination(player.position);
+        SetForwardAnimation();
     }
 
     private IEnumerator LookAroundAtPatrolPoint()
     {
+        isWaiting = true;
+        agent.isStopped = true;
 
-            print("test");
-            isWaiting = true;
-            agent.isStopped = true;
 
-            float lookTime = patrolWaitTime;
-            while (lookTime > 0f)
-            {
-                transform.Rotate(0, 120 * Time.deltaTime, 0);
-                lookTime -= Time.deltaTime;
-                yield return null;
-            }
+        float lookTime = patrolWaitTime;
+        float rotationSpeed = 30f; // Slower rotation speed for looking around
 
-            isWaiting = false;
-            agent.isStopped = false;
-            walkPointSet = false;
+        while (lookTime > 0f)
+        {
+            transform.Rotate(0, rotationSpeed * Time.deltaTime, 0);
+            lookTime -= Time.deltaTime;
+            yield return null;
+        }
+
+        isWaiting = false;
+        agent.isStopped = false;
+        walkPointSet = false;
+
         yield return new WaitForSeconds(2);
-            canLook = true;
-       yield return null;
-    }
-
-    private void UpdateAnimationDirectionAndTurning()
-    {
-        Vector3 directionToPlayer = (player.position - transform.position).normalized;
-        float angle = Vector3.SignedAngle(transform.forward, directionToPlayer, Vector3.up);
-
-        ResetAllAnimations();
-
-        if (angle > -22.5f && angle <= 22.5f)
-            enemyAnimator.SetBool("Forward", true);
-        else if (angle > 22.5f && angle <= 67.5f)
-            enemyAnimator.SetBool("ForwardRight", true);
-        else if (angle > 67.5f && angle <= 112.5f)
-            enemyAnimator.SetBool("Right", true);
-        else if (angle > 112.5f && angle <= 157.5f)
-            enemyAnimator.SetBool("BackwardRight", true);
-        else if ((angle > 157.5f && angle <= 180f) || (angle <= -157.5f && angle >= -180f))
-            enemyAnimator.SetBool("Backward", true);
-        else if (angle > -157.5f && angle <= -112.5f)
-            enemyAnimator.SetBool("BackwardLeft", true);
-        else if (angle > -112.5f && angle <= -67.5f)
-            enemyAnimator.SetBool("Left", true);
-        else if (angle > -67.5f && angle <= -22.5f)
-            enemyAnimator.SetBool("ForwardLeft", true);
-
+        canLook = true;
     }
 
     private void ResetAllAnimations()
     {
         enemyAnimator.SetBool("Forward", false);
-        enemyAnimator.SetBool("ForwardRight", false);
-        enemyAnimator.SetBool("Right", false);
-        enemyAnimator.SetBool("BackwardRight", false);
-        enemyAnimator.SetBool("Backward", false);
-        enemyAnimator.SetBool("BackwardLeft", false);
-        enemyAnimator.SetBool("Left", false);
-        enemyAnimator.SetBool("ForwardLeft", false);
-        enemyAnimator.SetBool("isAttacking", false);  // Reset attack bool
-
+        enemyAnimator.SetBool("isAttacking", false);
+        enemyAnimator.SetBool("Idle", false);
     }
+
+private void SetIdleAnimation()
+{
+    ResetAllAnimations();
+    enemyAnimator.SetBool("Idle", true);
+    Debug.Log("Idle animation triggered at patrol point");
+}
+
+private void SetForwardAnimation()
+{
+    ResetAllAnimations();
+    enemyAnimator.SetBool("Forward", true);
+    Debug.Log("Forward animation triggered while moving");
+}
 
     private void StartAttack()
     {
         if (!isAttacking)
         {
+            ResetAllAnimations();
             isAttacking = true;
             agent.isStopped = true;
-            enemyAnimator.SetBool("isAttacking", true);  // Set attack animation to active
+            enemyAnimator.SetBool("isAttacking", true);
         }
     }
 
@@ -322,7 +338,11 @@ public class EnemyAI : MonoBehaviour
         {
             isAttacking = false;
             agent.isStopped = false;
-            enemyAnimator.SetBool("isAttacking", false);  // Reset attack animation to inactive
+            ResetAllAnimations();
+            if (chasing)
+            {
+                SetForwardAnimation();
+            }
         }
     }
 

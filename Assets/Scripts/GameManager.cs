@@ -25,8 +25,8 @@ public class GameManager : MonoBehaviour
         quit = myPlayerInput.currentActionMap.FindAction("Quit");
         restart = myPlayerInput.currentActionMap.FindAction("Restart");
 
-        quit.performed += Quit_performed;
-        restart.performed += Restart_performed;
+        //quit.performed += Quit_performed;
+        //restart.performed += Restart_performed;
 
         // Hide all special item UI panels initially
         Sigil?.SetActive(false);
@@ -34,7 +34,7 @@ public class GameManager : MonoBehaviour
         Flint?.SetActive(false);
         ExorcismIndicator?.SetActive(false);  // Hide exorcism indicator initially
     }
-
+/*
     private void Restart_performed(InputAction.CallbackContext context)
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
@@ -44,7 +44,7 @@ public class GameManager : MonoBehaviour
     {
         Application.Quit();
     }
-
+*/
     public void UpdateHealth()
     {
         if (takeDamage.healthCount > 0)

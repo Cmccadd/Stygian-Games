@@ -1658,6 +1658,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1655195243}
+  - component: {fileID: 1655195245}
   - component: {fileID: 1655195242}
   - component: {fileID: 1655195244}
   m_Layer: 0
@@ -1727,6 +1728,19 @@ MonoBehaviour:
   m_DeselectOnBackgroundClick: 1
   m_PointerBehavior: 0
   m_CursorLockBehavior: 0
+--- !u!114 &1655195245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1655195240}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 365b14cab8a611e47b5f772d6b7bb6ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _mouseOn: 1
 --- !u!1 &1687117726
 GameObject:
   m_ObjectHideFlags: 0

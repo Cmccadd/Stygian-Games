@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed = 5f;
     public float jumpForce = 5.5f;
     public GameObject groundCheck;
+    [SerializeField] private GameObject _interactIcon;
     public LayerMask ground;
 
     private Vector2 inputDirection;
@@ -43,18 +44,32 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private AudioClip _deathSFX;
     [SerializeField] private AudioSource _myAudioSource;
 
+    [SerializeField] private TakeDamage TakeDamage;
+
+    //private bool canHide;
+
+    private GameManager gameManager;  // Reference to GameManager
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        TakeDamage = GetComponent<TakeDamage>();
         playerCollider = GetComponent<Collider>();
 
+        gameManager = FindObjectOfType<GameManager>();
+        inventory = FindObjectOfType<Inventory>();
         _checkpointManager = FindObjectOfType<CheckpointManager>();
         transform.position = _checkpointManager.LastCheckPointPos;
 
         isHidden = false;
         nearHideableObject = false;
         insideHideSpot = false;  // Default to false
+
+        //if (inventory.HasItem(excursionItemName))
+        //{
+        //    inventory.UseItem(excursionItemName);
+        //}
     }
 
     private void Start()
@@ -83,10 +98,20 @@ public class PlayerController : MonoBehaviour
     public void OnHide(InputValue value)
     {
         // Only allow hiding if the player is near or inside a hideable object
-        if (value.isPressed && nearHideableObject && insideHideSpot)
+        if (value.isPressed && nearHideableObject && insideHideSpot /*&& canHide*/)
         {
             ToggleHide();
         }
+    }
+
+    public void CantHide()
+    {
+       // canHide = false;
+    }
+
+    public void CanHide()
+    {
+       // canHide = true;
     }
 
     public void OnInteract(InputValue value)
@@ -166,6 +191,32 @@ public class PlayerController : MonoBehaviour
         {
             _walkingSFX.SetActive(false);
         }
+
+        CheckForNearbyEnemies();
+    }
+
+    private void CheckForNearbyEnemies()
+    {
+        bool enemyInRange = false;
+        enemiesInRange = Physics.OverlapSphere(transform.position, exorcismRange, LayerMask.GetMask("Enemy"));
+
+        foreach (Collider enemyCollider in enemiesInRange)
+        {
+            if (enemyCollider != null)
+            {
+                EnemyAI enemy = enemyCollider.GetComponent<EnemyAI>();
+                if (enemy != null)
+                {
+                    enemyInRange = true;
+                    break;
+                }
+            }
+        }
+        if (inventory.HasItem(excursionItemName))
+        {
+            gameManager.ToggleExorcismIndicator(enemyInRange);  // Show or hide exorcism UI based on proximity
+        }
+
     }
 
     private void MovePlayer()
@@ -177,9 +228,7 @@ public class PlayerController : MonoBehaviour
             rb.velocity = movement;
             _animator.SetBool("Moving", true);
         }
-    }
-
-    private void Jump()
+    }    private void Jump()
     {
         rb.velocity = new Vector3(rb.velocity.x, jumpForce, rb.velocity.z);
     }
@@ -195,6 +244,7 @@ public class PlayerController : MonoBehaviour
 
         if (isHidden)
         {
+            TakeDamage.CanGetHit = false;
             rb.velocity = Vector3.zero;
             _animator.SetBool("Hiding", true);
             _enemyNoticeAnimator.SetBool("Hidden", true);
@@ -212,6 +262,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
+            TakeDamage.CanGetHit = true;
             _animator.SetBool("Hiding", false);
             _enemyNoticeAnimator.SetBool("Hidden", false);
             //spriteRenderer.enabled = true;
@@ -247,34 +298,30 @@ public class PlayerController : MonoBehaviour
     // Check for enemies in the exorcism range and use the excursion item if available
     private void UseExcursionItemOnEnemies()
     {
-        // Check if the player has the required excursion item in the inventory
         if (inventory.HasItem(excursionItemName))
         {
-            // Get all colliders in the exorcism range
             enemiesInRange = Physics.OverlapSphere(transform.position, exorcismRange, LayerMask.GetMask("Enemy"));
-
-            bool enemyInRange = false; // Track if any enemy is in range
+            bool enemyInRange = false;
 
             foreach (Collider enemyCollider in enemiesInRange)
             {
-                // Check if the enemyCollider is still valid (not null) before accessing its EnemyAI component
                 if (enemyCollider != null)
                 {
                     EnemyAI enemy = enemyCollider.GetComponent<EnemyAI>();
-                    EnemyAIPreist preist = enemyCollider.GetComponent<EnemyAIPreist>();
-                    if (preist != null) // Ensure the enemy is not destroyed
+                    if (enemy != null)
                     {
-                        preist.Excise();
-                        enemyInRange = true; // Mark that an enemy was in range
+                        enemy.Excise();
+                        enemyInRange = true;
                     }
                 }
             }
 
-            // Only use the Sigil if an enemy was exorcised
             if (enemyInRange)
             {
                 _animator.Play("Will_Exorcise_Anim");
                 inventory.UseItem(excursionItemName);
+
+                gameManager.ToggleExorcismIndicator(false);  // Turn off the UI indicator
                 Debug.Log("Sigil used to exorcise enemy.");
             }
             else
@@ -310,11 +357,15 @@ public class PlayerController : MonoBehaviour
             insideHideSpot = false; // Reset when leaving hideable area
             _hideIndicator.SetActive(false);
         }
+        if (other.gameObject.tag == "Interactable")
+        {
+            _interactIcon.SetActive(false);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Hideable"))
+        if (other.CompareTag("Hideable")/* && canHide == true*/)
         {
             nearHideableObject = true;
             _hideIndicator.SetActive(true);
@@ -322,6 +373,10 @@ public class PlayerController : MonoBehaviour
         if (other.CompareTag("Cutscene"))
         {
             dying = true;
+        }
+        if (other.gameObject.tag == "Interactable")
+        {
+            _interactIcon.SetActive(true);
         }
     }
 
@@ -336,6 +391,12 @@ public class PlayerController : MonoBehaviour
     }
 
     public void Dead()
+    {
+        //_myAudioSource.PlayOneShot(_deathSFX);
+        dying = true;
+    }
+
+    public void Crush()
     {
         _myAudioSource.PlayOneShot(_deathSFX);
         dying = true;

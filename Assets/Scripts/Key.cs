@@ -5,7 +5,7 @@ public class KeyItem : Interactable
 {
     public InventoryItem keyItem;  // Reference to the key item (ScriptableObject)
     public GameObject itemPickupUI;  // Reference to the UI GameObject
-    [SerializeField] private GameObject _interactIcon;
+    //[SerializeField] private GameObject _interactIcon;
     public override void InteractWith(PlayerController player)
     {
         base.InteractWith(player);
@@ -13,6 +13,7 @@ public class KeyItem : Interactable
         // Add the key to the player's inventory
         if (player.inventory.AddItem(keyItem))
         {
+            itemPickupUI.SetActive(true);
             // Show the UI element when the item is picked up
             GameManager gameManager = FindObjectOfType<GameManager>();
             if (gameManager != null)
@@ -31,19 +32,19 @@ public class KeyItem : Interactable
             Debug.Log("Failed to add key to inventory.");
         }
     }
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.tag == "Player")
-        {
-            _interactIcon.SetActive(true);
-        }
-    }
+    //private void OnTriggerEnter(Collider other)
+    //{
+    //    if (other.gameObject.tag == "Player")
+    //    {
+    //        _interactIcon.SetActive(true);
+    //    }
+    //}
 
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.gameObject.tag == "Player")
-        {
-            _interactIcon.SetActive(false);
-        }
-    }
+    //private void OnTriggerExit(Collider other)
+    //{
+    //    if (other.gameObject.tag == "Player")
+    //    {
+    //        _interactIcon.SetActive(false);
+    //    }
+    //}
 }

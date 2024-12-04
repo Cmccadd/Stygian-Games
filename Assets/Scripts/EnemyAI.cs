@@ -66,6 +66,7 @@ public class EnemyAI : MonoBehaviour
 
 
     private bool chasing;
+    private bool isCurrentlyLooking;
 
     private void Start()
     {
@@ -148,6 +149,7 @@ public class EnemyAI : MonoBehaviour
                 SetForwardAnimation();
                 isCurrentlyWalking = true;
                 isCurrentlyIdle = false;
+                isCurrentlyLooking = false;
             }
         }
         else
@@ -157,8 +159,21 @@ public class EnemyAI : MonoBehaviour
                 SetIdleAnimation();
                 isCurrentlyIdle = true;
                 isCurrentlyWalking = false;
+                isCurrentlyLooking = false;
             }
+
+            if (!isCurrentlyLooking && !isCurrentlyIdle)
+            {
+                SetLookAroundAnimation();
+                isCurrentlyLooking = true;
+                isCurrentlyWalking = false;
+                isCurrentlyIdle = false;
+
+
+            }
+
         }
+    
     }
 
     private void InitializeEnemy()
@@ -224,26 +239,12 @@ public class EnemyAI : MonoBehaviour
 
     private void Patroling()
     {
-        agent.isStopped = false;
-        agent.speed = patrolSpeed;
-
         if (!walkPointSet && patrolPoints.Length > 0 && !isWaiting)
         {
             SetNextPatrolPoint();
         }
 
-        // Check if agent is moving to the patrol point
-        if (walkPointSet && agent.remainingDistance > agent.stoppingDistance)
-        {
-            if (!isCurrentlyWalking)
-            {
-                SetForwardAnimation();
-                isCurrentlyWalking = true;
-                isCurrentlyIdle = false;
-            }
-        }
-        // Check if agent has arrived at the patrol point
-        else if (walkPointSet && agent.remainingDistance <= agent.stoppingDistance)
+        if (walkPointSet && agent.remainingDistance <= agent.stoppingDistance && !isWaiting)
         {
             if (!isCurrentlyIdle)
             {
@@ -251,12 +252,11 @@ public class EnemyAI : MonoBehaviour
                 isCurrentlyIdle = true;
                 isCurrentlyWalking = false;
 
-                // Handle patrol wait/look around behavior
+                // Trigger look-around behavior
                 if (canLook)
                 {
-                    canLook = false;
-                    walkPointSet = false;
                     StartCoroutine(LookAroundAtPatrolPoint());
+                    isCurrentlyLooking = true; // Enter look-around state
                 }
             }
         }
@@ -265,13 +265,14 @@ public class EnemyAI : MonoBehaviour
     private void SetNextPatrolPoint()
     {
         ResetAllAnimations();
+        patrolIndex = (patrolIndex + 1) % patrolPoints.Length;
         agent.SetDestination(patrolPoints[patrolIndex].position);
         walkPointSet = true;
-        patrolIndex = (patrolIndex + 1) % patrolPoints.Length;
 
-        SetForwardAnimation(); // Start walking to the next point
+        SetForwardAnimation(); // Start walking animation
         isCurrentlyWalking = true;
         isCurrentlyIdle = false;
+        isCurrentlyLooking = false;
     }
 
     private void ChasePlayer()
@@ -290,23 +291,38 @@ public class EnemyAI : MonoBehaviour
         isWaiting = true;
         agent.isStopped = true;
 
+        // Set the look-around animation
+        SetLookAroundAnimation();
 
+        Debug.Log("Looking around at patrol point.");
         float lookTime = patrolWaitTime;
-       //. float rotationSpeed = 30f; // Slower rotation speed for looking around
+        float totalRotation = 0f; // Track how much we've rotated
 
+        // Rotate while looking around
         while (lookTime > 0f)
         {
-            transform.Rotate(0, RotationSpeed * Time.deltaTime, 0);
+            float rotationStep = RotationSpeed * Time.deltaTime;
+            transform.Rotate(0, rotationStep, 0);
+            totalRotation += rotationStep;
+
+            // Simulate alternating directions (optional)
+            if (totalRotation >= 90f)
+            {
+                RotationSpeed = -RotationSpeed; // Reverse rotation
+                totalRotation = 0f;
+            }
+
             lookTime -= Time.deltaTime;
             yield return null;
         }
 
+        Debug.Log("Finished looking around.");
         isWaiting = false;
         agent.isStopped = false;
-        walkPointSet = false;
 
-        yield return new WaitForSeconds(.5f);
-        canLook = true;
+        // Resume patrolling to the next point
+        walkPointSet = false;
+        SetNextPatrolPoint();
     }
 
     private void ResetAllAnimations()
@@ -314,6 +330,7 @@ public class EnemyAI : MonoBehaviour
         enemyAnimator.SetBool("Forward", false);
         enemyAnimator.SetBool("isAttacking", false);
         enemyAnimator.SetBool("Idle", false);
+        enemyAnimator.SetBool("Looking", false);
     }
 
 private void SetIdleAnimation()
@@ -321,6 +338,12 @@ private void SetIdleAnimation()
     ResetAllAnimations();
     enemyAnimator.SetBool("Idle", true);
     Debug.Log("Idle animation triggered at patrol point");
+}
+private void SetLookAroundAnimation()
+{
+    ResetAllAnimations();
+    enemyAnimator.SetBool("Looking", true);
+    Debug.Log("Looking Around animation triggered");
 }
 
 private void SetForwardAnimation()
